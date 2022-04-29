@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import Control.Arrow
 import Control.Concurrent
 import Data.List
