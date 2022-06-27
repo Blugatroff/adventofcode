@@ -1,5 +1,6 @@
 module Util where
 
+import Data.Char (isSpace)
 import Data.List (findIndex, isPrefixOf)
 import qualified Data.Map as M
 import Data.Maybe
@@ -52,3 +53,13 @@ dedup :: Ord a => [a] -> [(a, Int)]
 dedup list = M.toList $ foldl f M.empty list
   where
     f map k = M.insertWith (+) k 1 map
+
+remove :: Int -> [a] -> [a]
+remove _ [] = []
+remove 0 (_ : list) = list
+remove index (v : list) = v : remove (index - 1) list
+
+set :: Int -> a -> [a] -> [a]
+set index v = zipWith f [0 ..]
+  where
+    f i a = if i == index then v else a
