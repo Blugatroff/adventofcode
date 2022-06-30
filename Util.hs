@@ -1,5 +1,6 @@
 module Util where
 
+import qualified Data.Array as A
 import Data.Char (isSpace)
 import Data.List (findIndex, isPrefixOf)
 import qualified Data.Map as M
@@ -63,3 +64,6 @@ set :: Int -> a -> [a] -> [a]
 set index v = zipWith f [0 ..]
   where
     f i a = if i == index then v else a
+
+(|>) :: a -> (a -> b) -> b
+a |> f = f a
