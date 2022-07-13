@@ -69,6 +69,7 @@ main =
         concat
           [ grid |> solve1 |> show,
             "\n",
-            grid |> solve2 |> show
+            grid |> solve2 |> show,
+            "\n"
           ]
     )
