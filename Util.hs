@@ -26,6 +26,10 @@ safeTail :: [a] -> [a]
 safeTail [] = []
 safeTail (_ : t) = t
 
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead (a : _) = Just a
+
 splitSeq :: Eq a => [a] -> [a] -> [[a]]
 splitSeq del list = maybe [list] ((\(before, after) -> before : splitSeq del (drop (length del) after)) . flip splitAt list) (findSeq del list)
 
@@ -67,3 +71,13 @@ set index v = zipWith f [0 ..]
 
 (|>) :: a -> (a -> b) -> b
 a |> f = f a
+
+(<#>) :: Functor f => f a -> (a -> b) -> f b
+functor <#> function = fmap function functor
+
+(>>>) :: (a -> b) -> (b -> c) -> (a -> c)
+a >>> b = b . a
+
+indexed :: [a] -> [(Int, a)]
+indexed list = zip [0..] list
+

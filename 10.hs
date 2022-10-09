@@ -40,10 +40,8 @@ match line = matchOnce line >>= match
       Just (open, close) -> Left $ ExpectedClosing close Nothing
       Nothing -> Left ExpectedOpeningParen
     matchOnce (c1 : c2 : line) = case find (\(open, close) -> open == c1) parens of
-      Just (open, close) ->
-        if c2 == close
-          then Right line
-          else f close (c2 : line)
+      Just (open, close) | c2 == close -> Right line
+      Just (open, close) -> f close (c2 : line)
       Nothing -> Left ExpectedOpeningParen
 
     f :: Char -> [Char] -> Either Error String
@@ -84,7 +82,8 @@ solve :: [[Char]] -> Int
 solve lines = sum $ map (fromMaybe 0 . solveLine) lines
 
 solveLine2 :: [Char] -> Maybe String
-solveLine2 line = if isIncomplete $ match line then Just (complete line "") else Nothing
+solveLine2 line | isIncomplete $ match line = Just (complete line "")
+solveLine2 _ = Nothing
 
 parenPoints2 :: Char -> Int
 parenPoints2 ')' = 1
