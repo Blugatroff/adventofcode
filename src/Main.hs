@@ -60,7 +60,7 @@ start (Args (Day dayIndex) part) = do
   stdin <- getContents
   case solveFn stdin of
     Left error -> abort $ "Error: " <> error
-    Right result -> putStrLn $ "Result: " <> result
+    Right result -> putStrLn $ "Result: \n" <> result
 
 main :: IO ()
 main = do

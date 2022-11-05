@@ -64,3 +64,11 @@ chunks size list = case splitAt size list of
 
 mapSnd :: (a -> b) -> (c, a) -> (c, b)
 mapSnd f (c, a) = (c, f a)
+
+leftToMaybe :: Either a b -> Maybe a
+leftToMaybe (Left a) = Just a
+leftToMaybe (Right b) = Nothing
+
+rightToMaybe :: Either a b -> Maybe b
+rightToMaybe (Left a) = Nothing
+rightToMaybe (Right b) = Just b

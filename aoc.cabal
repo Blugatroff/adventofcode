@@ -25,6 +25,7 @@ executable aoc
         Days.Day10
         Days.Day11
         Days.Day12
+        Days.Day13
 
     build-depends:    
         base ^>=4.14.3.0,

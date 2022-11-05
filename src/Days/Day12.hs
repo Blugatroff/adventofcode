@@ -4,15 +4,11 @@
 
 module Days.Day12 (partOne, partTwo) where
 
-import Control.Monad (forM)
-import Data.Char (digitToInt, isControl, isLower, isSpace, isUpper)
-import Data.Foldable (find)
+import Data.Char (isUpper)
 import Data.Function ((&))
 import Data.Functor (($>), (<&>))
-import Data.List (elemIndex, findIndex, nub, sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import qualified Data.Set as S
 import Util (remove, set, split, trim)
 
 data Node = Small !String | Big !String
