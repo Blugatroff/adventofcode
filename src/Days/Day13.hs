@@ -7,7 +7,7 @@ import Data.Maybe (mapMaybe)
 import Text.Read (readEither)
 import Util (leftToMaybe, remove, rightToMaybe, set, split, trim)
 
-data Fold = FoldAlongX Int | FoldAlongY Int
+data Fold = FoldAlongX !Int | FoldAlongY !Int
   deriving (Show)
 
 data Input = Input

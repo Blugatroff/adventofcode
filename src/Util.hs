@@ -1,6 +1,7 @@
 module Util where
 
-import Data.List (dropWhileEnd, isPrefixOf)
+import Data.Function ((&))
+import Data.List (dropWhileEnd, isPrefixOf, maximumBy, minimumBy)
 import qualified Data.Map as M
 
 split :: Eq a => a -> [a] -> [[a]]
@@ -33,7 +34,14 @@ findSeq pat list = case span (\v -> v /= head pat) list of
   (before, match) -> (+) (length before) <$> findSeq pat (tail match)
 
 splitSeq :: Eq a => [a] -> [a] -> [[a]]
-splitSeq del list = maybe [list] ((\(before, after) -> before : splitSeq del (drop (length del) after)) . flip splitAt list) (findSeq del list)
+splitSeq del list =
+  findSeq del list
+    & maybe
+      [list]
+      ( \splitIndex ->
+          splitAt splitIndex list
+            & \(before, after) -> before : splitSeq del (drop (length del) after)
+      )
 
 dedup :: Ord a => [a] -> [(a, Int)]
 dedup list = M.toList $ foldl f M.empty list
@@ -62,6 +70,9 @@ chunks size [] = []
 chunks size list = case splitAt size list of
   (chunk, rest) -> chunk : chunks size rest
 
+mapFst :: (a -> b) -> (a, c) -> (b, c)
+mapFst f (a, c) = (f a, c)
+
 mapSnd :: (a -> b) -> (c, a) -> (c, b)
 mapSnd f (c, a) = (c, f a)
 
@@ -72,3 +83,23 @@ leftToMaybe (Right b) = Nothing
 rightToMaybe :: Either a b -> Maybe b
 rightToMaybe (Left a) = Nothing
 rightToMaybe (Right b) = Just b
+
+maximumByKey :: Ord b => (a -> b) -> [a] -> Maybe a
+maximumByKey key [] = Nothing
+maximumByKey key list = Just $ maximumBy (\a b -> compare (key a) (key b)) list
+
+minimumByKey :: Ord b => (a -> b) -> [a] -> Maybe a
+minimumByKey key [] = Nothing
+minimumByKey key list = Just $ minimumBy (\a b -> compare (key a) (key b)) list
+
+maybeToRight :: e -> Maybe a -> Either e a
+maybeToRight error Nothing = Left error
+maybeToRight error (Just value) = Right value
+
+applyN :: Int -> (a -> a) -> a -> a
+applyN 0 f v = v
+applyN n f v = applyN (n - 1) f (f v)
+
+listToTuple :: [a] -> Maybe (a, a)
+listToTuple [a, b] = Just (a, b)
+listToTuple _ = Nothing

@@ -12,6 +12,7 @@ import qualified Days.Day10 as Day10
 import qualified Days.Day11 as Day11
 import qualified Days.Day12 as Day12
 import qualified Days.Day13 as Day13
+import qualified Days.Day14 as Day14
 import qualified Days.Day2 as Day2
 import qualified Days.Day3 as Day3
 import qualified Days.Day4 as Day4
@@ -42,5 +43,6 @@ days =
     Day Day10.partOne Day10.partTwo,
     Day Day11.partOne Day11.partTwo,
     Day Day12.partOne Day12.partTwo,
-    Day Day13.partOne Day13.partTwo
+    Day Day13.partOne Day13.partTwo,
+    Day Day14.partOne Day14.partTwo
   ]
