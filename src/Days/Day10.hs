@@ -1,14 +1,17 @@
+module Days.Day10 (partOne, partTwo) where
+
 import Data.Char (digitToInt, isControl, isSpace)
 import Data.Foldable (find)
+import Data.Function ((&))
 import Data.List (elemIndex, findIndex, sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import Util (remove, set, split, trim, (|>))
+import Util (remove, set, split, trim)
 
 parse :: String -> [[Char]]
 parse input =
   split '\n' input
-    |> filter (not . null)
+    & filter (not . null)
 
 parens :: [(Char, Char)]
 parens =
@@ -78,8 +81,8 @@ illegalChar _ = Nothing
 solveLine :: [Char] -> Maybe Int
 solveLine line = parenPoints <$> illegalChar (match line)
 
-solve :: [[Char]] -> Int
-solve lines = sum $ map (fromMaybe 0 . solveLine) lines
+solvePartOne :: [[Char]] -> Int
+solvePartOne lines = sum $ map (fromMaybe 0 . solveLine) lines
 
 solveLine2 :: [Char] -> Maybe String
 solveLine2 line | isIncomplete $ match line = Just (complete line "")
@@ -95,9 +98,13 @@ parenPoints2 _ = undefined
 computeScore :: Int -> [Char] -> Int
 computeScore = foldl (\score c -> score * 5 + parenPoints2 c)
 
-solve2 :: [[Char]] -> Int
-solve2 lines = scores !! (length scores `div` 2)
+solvePartTwo :: [[Char]] -> Int
+solvePartTwo lines = scores !! (length scores `div` 2)
   where
     scores = sort $ mapMaybe (fmap (computeScore 0) . solveLine2) lines
 
-main = interact $ show . solve2 . parse
+partOne :: String -> Either String String
+partOne = Right . show . solvePartOne . parse
+
+partTwo :: String -> Either String String
+partTwo = Right . show . solvePartTwo . parse

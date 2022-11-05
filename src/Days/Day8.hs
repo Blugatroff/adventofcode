@@ -1,3 +1,5 @@
+module Days.Day8 (partOne, partTwo) where
+
 import Data.Char (digitToInt, isSpace)
 import Data.Foldable (find)
 import Data.List (elemIndex, findIndex, sort)
@@ -81,7 +83,21 @@ digitsToInt digits = f $ reverse digits
 solveLine :: ([String], [String]) -> Int
 solveLine (segments, outputs) = digitsToInt $ matchOutputs (solveSegments segments) outputs
 
-solve :: [([String], [String])] -> Int
-solve = sum . map solveLine
+solvePartTwo :: [([String], [String])] -> Int
+solvePartTwo = sum . map solveLine
 
-main = interact $ show . solve . parse
+solvePartOne :: [([String], [String])] -> Int
+solvePartOne = sum . map (sum . map (isSimpleDigit . length) . snd)
+  where
+    isSimpleDigit :: Int -> Int
+    isSimpleDigit 2 = 1
+    isSimpleDigit 4 = 1
+    isSimpleDigit 3 = 1
+    isSimpleDigit 7 = 1
+    isSimpleDigit _ = 0
+
+partOne :: String -> Either String String
+partOne = Right . show . solvePartOne . parse
+
+partTwo :: String -> Either String String
+partTwo = Right . show . solvePartTwo . parse

@@ -1,5 +1,5 @@
-import Control.Arrow
-import Control.Concurrent
+module Days.Day3 (partOne, partTwo) where
+
 import Data.List
 import GHC.Base
 import Util
@@ -25,10 +25,10 @@ fromBitsRev (True : rest) = 1 + fromBitsRev (False : rest)
 fromBitsRev (False : rest) = 2 * fromBitsRev rest
 
 fromBits :: [Bool] -> Int
-fromBits = reverse >>> fromBitsRev
+fromBits = fromBitsRev . reverse
 
-solve :: [[Bool]] -> Int
-solve lines = fromBits bits * fromBits (map not bits)
+solvePartOne :: [[Bool]] -> Int
+solvePartOne lines = fromBits bits * fromBits (map not bits)
   where
     tl = transpose lines
     bits = map mostCommon tl
@@ -56,12 +56,11 @@ oxyRating = fromBits . ratingFromBitCriteria oxyBitCriteria
 scrubberRating :: [[Bool]] -> Int
 scrubberRating = fromBits . ratingFromBitCriteria scrubberBitCriteria
 
-solve2 :: [[Bool]] -> Int
-solve2 numbers = oxyRating numbers * scrubberRating numbers
+solvePartTwo :: [[Bool]] -> Int
+solvePartTwo numbers = oxyRating numbers * scrubberRating numbers
 
-main :: IO ()
-main = do
-  numbers <- parse <$> getContents
-  print $ solve numbers
-  print $ solve2 numbers
-  return ()
+partOne :: String -> Either String String
+partOne = Right . show . solvePartOne . parse
+
+partTwo :: String -> Either String String
+partTwo = Right . show . solvePartTwo . parse

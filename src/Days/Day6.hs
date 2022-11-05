@@ -1,10 +1,13 @@
+module Days.Day6 (partOne, partTwo) where
+
 import Data.List
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
+import Text.Read (readEither)
 import Util
 
-parse :: String -> [Int]
-parse = map read . split ','
+parse :: String -> Either String [Int]
+parse = traverse readEither . split ','
 
 iterateMap :: v -> Int -> M.Map Int v -> [(Int, v)]
 iterateMap def 0 map = []
@@ -23,7 +26,11 @@ step fish = M.insertWith (+) 6 f0 $ M.insertWith (+) 8 f0 $ age $ M.insert 0 0 f
     f0 :: Int
     f0 = fromMaybe 0 $ M.lookup 0 fish
 
-solve :: Int -> [Int] -> Int
-solve days fish = M.foldl (+) 0 $ (!! days) $ iterate step $ M.fromList $ dedup fish
+solvePartTwo :: Int -> [Int] -> Int
+solvePartTwo days fish = M.foldl (+) 0 $ (!! days) $ iterate step $ M.fromList $ dedup fish
 
-main = interact $ show . solve 256 . parse
+partOne :: String -> Either String String
+partOne input = show . solvePartTwo 80 <$> parse input
+
+partTwo :: String -> Either String String
+partTwo input = show . solvePartTwo 256 <$> parse input

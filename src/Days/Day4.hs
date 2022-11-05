@@ -1,7 +1,10 @@
+module Days.Day4 (partOne, partTwo) where
+
 import Data.List
+import Text.Read (readEither)
 import Util
 
-data Slot = Slot Bool Int
+data Slot = Slot !Bool !Int
 
 instance Show Slot where
   show (Slot marked n) = show n ++ (if marked then "+" else "-")
@@ -23,7 +26,7 @@ showListPadded n l = '[' : intercalate "," (map (showPadded n) l) ++ "]"
 instance Show Board where
   show (Board slots) = "Board [\n" ++ concatMap ('\t' :) (intersperse "\n" $ map (showListPadded 2) slots) ++ "\n]"
 
-data Game = Game [Int] [Board]
+data Game = Game ![Int] ![Board]
   deriving (Show)
 
 replaceUntilNoChange :: Eq a => [a] -> [a] -> [a] -> [a]
@@ -36,19 +39,20 @@ chunksOf size list = if null b then [a] else a : chunksOf size b
   where
     (a, b) = splitAt size list
 
-parseBoard :: [String] -> Board
-parseBoard = Board . map (map (Slot False . read) . split ' ' . replaceUntilNoChange "  " " ")
+parseBoard :: [String] -> Either String Board
+parseBoard lines = Board <$> traverse (traverse (fmap (Slot False) . readEither) . split ' ' . replaceUntilNoChange "  " " ") lines
 
 trimSpaces :: String -> String
 trimSpaces = trim (== ' ')
 
-parse :: String -> Game
-parse s = Game draws boards
+parse :: String -> Either String Game
+parse s = do
+  draws <- traverse readEither $ split ',' drawsLine
+  boards <- traverse parseBoard $ chunksOf 5 $ map (trim (== ' ')) boardLines
+  return $ Game draws boards
   where
     lines = filter (not . null) $ split '\n' s
     (drawsLine : boardLines) = lines
-    draws = map read $ split ',' drawsLine
-    boards = map parseBoard $ chunksOf 5 $ map (trim (== ' ')) boardLines
 
 playRound :: Int -> Board -> Board
 playRound draw = Board . map (map mapSlot) . slots
@@ -93,19 +97,22 @@ play (Game (draw : draws) boards) =
     newBoards = map (playRound draw) boards
     winningBoard = find hasWon newBoards
 
-solve :: Game -> Int
-solve game = case winner of
+solvePartOne :: Game -> Int
+solvePartOne game = case winner of
   Nothing -> error "no winner found"
   Just (board, draw) -> computeScore draw board
   where
     winner = play game
 
-solve2 :: Game -> Int
-solve2 game = case loser of
+solvePartTwo :: Game -> Int
+solvePartTwo game = case loser of
   Nothing -> error "not loser found"
-  Just (board, draw, draws) -> solve $ Game draws [board]
+  Just (board, draw, draws) -> solvePartOne $ Game draws [board]
   where
     loser = playLoser game
 
-main :: IO ()
-main = interact $ show . solve2 . parse
+partOne :: String -> Either String String
+partOne input = show . solvePartOne <$> parse input
+
+partTwo :: String -> Either String String
+partTwo input = show . solvePartTwo <$> parse input
