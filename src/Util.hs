@@ -103,3 +103,6 @@ applyN n f v = applyN (n - 1) f (f v)
 listToTuple :: [a] -> Maybe (a, a)
 listToTuple [a, b] = Just (a, b)
 listToTuple _ = Nothing
+
+third :: (a, b, c) -> c
+third (a, b, c) = c
