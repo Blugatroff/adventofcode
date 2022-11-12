@@ -13,6 +13,11 @@ split del list = f $ span (/= del) list
     f (seg, []) = [seg]
     f (seg, _ : rest) = seg : split del rest
 
+splitOnce :: Eq a => a -> [a] -> Maybe ([a], [a])
+splitOnce del list = case split del list of
+  [a, b] -> Just (a, b)
+  _ -> Nothing
+
 lpad :: Int -> a -> [a] -> [a]
 lpad n v l = map (const v) [0 .. (n - length l)] ++ l
 
@@ -42,6 +47,11 @@ splitSeq del list =
           splitAt splitIndex list
             & \(before, after) -> before : splitSeq del (drop (length del) after)
       )
+
+splitSeqOnce :: Eq a => [a] -> [a] -> Maybe ([a], [a])
+splitSeqOnce del list = case splitSeq del list of
+  [a, b] -> Just (a, b)
+  _ -> Nothing
 
 dedup :: Ord a => [a] -> [(a, Int)]
 dedup list = M.toList $ foldl f M.empty list
@@ -106,3 +116,8 @@ listToTuple _ = Nothing
 
 third :: (a, b, c) -> c
 third (a, b, c) = c
+
+sign :: Int -> Int
+sign n | n > 0 = 1
+sign n | n < 0 = -1
+sign n = 0

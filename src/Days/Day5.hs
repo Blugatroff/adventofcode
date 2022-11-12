@@ -21,11 +21,6 @@ parseLine input = fmap intoTuple $ traverse parsePoint $ splitSeq " -> " input
 parse :: String -> Either String [Line]
 parse = traverse parseLine . split '\n'
 
-sign :: Int -> Int
-sign n | n > 0 = 1
-sign n | n < 0 = -1
-sign n = 0
-
 genLine :: Line -> [Point]
 genLine ((x1, y1), (x2, y2)) | x1 == x2 && y1 == y2 = [(x1, y1)]
 genLine ((x1, y1), (x2, y2)) = (x1, y1) : genLine ((x1 + sign (x2 - x1), y1 + sign (y2 - y1)), (x2, y2))
