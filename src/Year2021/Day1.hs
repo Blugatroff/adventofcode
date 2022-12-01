@@ -1,4 +1,4 @@
-module Days.Day1 (partOne, partTwo) where
+module Year2021.Day1 (partOne, partTwo) where
 
 import Data.Foldable (Foldable (foldl'))
 import Data.Maybe (fromMaybe, mapMaybe, maybeToList)

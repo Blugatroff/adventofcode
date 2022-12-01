@@ -1,4 +1,4 @@
-module Days.Day4 (partOne, partTwo) where
+module Year2021.Day4 (partOne, partTwo) where
 
 import Data.List
 import Text.Read (readEither)

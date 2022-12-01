@@ -1,4 +1,4 @@
-module Days.Day3 (partOne, partTwo) where
+module Year2021.Day3 (partOne, partTwo) where
 
 import Data.List
 import GHC.Base

@@ -2,7 +2,7 @@
 
 {-# HLINT ignore "Use if" #-}
 
-module Days.Day12 (partOne, partTwo) where
+module Year2021.Day12 (partOne, partTwo) where
 
 import Data.Char (isUpper)
 import Data.Function ((&))

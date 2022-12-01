@@ -1,8 +1,10 @@
 module Util where
 
+import Data.Either.Combinators (mapLeft)
 import Data.Function ((&))
 import Data.List (dropWhileEnd, isPrefixOf, maximumBy, minimumBy)
 import qualified Data.Map as M
+import Text.Read (readEither)
 
 split :: Eq a => a -> [a] -> [[a]]
 split del [] = []
@@ -121,3 +123,13 @@ sign :: Int -> Int
 sign n | n > 0 = 1
 sign n | n < 0 = -1
 sign n = 0
+
+maximum :: Ord a => [a] -> Maybe a
+maximum [] = Nothing
+maximum list = Just $ Prelude.maximum list
+
+readWithErrorMessage :: (String -> String) -> String -> Either String Int
+readWithErrorMessage error input = readEither input & mapLeft (const $ error input)
+
+readInt :: String -> Either String Int
+readInt = readWithErrorMessage $ \input -> "expected an integer but got: \"" <> input <> "\""

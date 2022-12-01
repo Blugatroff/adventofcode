@@ -1,4 +1,4 @@
-module Days.Day14 (partOne, partTwo) where
+module Year2021.Day14 (partOne, partTwo) where
 
 import Control.Monad (forM_)
 import Control.Monad.State (State, execState, get, modify)

@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Days.Day16 (partOne, partTwo) where
+module Year2021.Day16 (partOne, partTwo) where
 
 import Control.Monad.Except (ExceptT (ExceptT), lift, runExceptT)
 import Control.Monad.State (MonadState (put), State, evalState, get, gets, modify, runState)

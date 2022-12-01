@@ -1,4 +1,4 @@
-module Days.Day8 (partOne, partTwo) where
+module Year2021.Day8 (partOne, partTwo) where
 
 import Data.Char (digitToInt, isSpace)
 import Data.Foldable (find)

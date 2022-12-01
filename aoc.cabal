@@ -12,24 +12,28 @@ executable aoc
 
     other-modules: 
         Util
-        Days
-        Days.Day1
-        Days.Day2
-        Days.Day3
-        Days.Day4
-        Days.Day5
-        Days.Day6
-        Days.Day7
-        Days.Day8
-        Days.Day9
-        Days.Day10
-        Days.Day11
-        Days.Day12
-        Days.Day13
-        Days.Day14
-        Days.Day15
-        Days.Day16
-        Days.Day17
+        Year2021
+        Year2022
+        Day
+        Year2021.Day1
+        Year2021.Day2
+        Year2021.Day3
+        Year2021.Day4
+        Year2021.Day5
+        Year2021.Day6
+        Year2021.Day7
+        Year2021.Day8
+        Year2021.Day9
+        Year2021.Day10
+        Year2021.Day11
+        Year2021.Day12
+        Year2021.Day13
+        Year2021.Day14
+        Year2021.Day15
+        Year2021.Day16
+        Year2021.Day17
+        Year2021.Day18
+        Year2022.Day1
 
     build-depends:    
         base ^>=4.14.3.0,

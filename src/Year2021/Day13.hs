@@ -1,4 +1,4 @@
-module Days.Day13 (partOne, partTwo) where
+module Year2021.Day13 (partOne, partTwo) where
 
 import Data.Function ((&))
 import Data.Functor ((<&>))
