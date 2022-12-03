@@ -3,12 +3,9 @@ module Year2022.Day2 (partOne, partTwo) where
 import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.List (intersperse, sort)
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
-import Text.Read (readEither, readMaybe)
-import Util (readInt, split, splitOnce, trim)
-import qualified Util
+import Data.Maybe (fromMaybe)
+import Util (split, splitOnce, trim)
 
 data Shape = Rock | Paper | Scissor
   deriving (Show, Eq, Ord)

@@ -4,8 +4,7 @@ import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (sort)
-import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
-import Text.Read (readEither, readMaybe)
+import Data.Maybe (fromMaybe)
 import Util (readInt, split, trim)
 import qualified Util
 
