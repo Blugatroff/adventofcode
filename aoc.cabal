@@ -50,4 +50,8 @@ executable aoc
     default-language: Haskell2010
     default-extensions:
         TupleSections,
-        LambdaCase
+        LambdaCase,
+        FlexibleContexts
+    ghc-options:
+        -fwrite-ide-info
+        -hiedir=.hie

@@ -2,8 +2,9 @@ module Util where
 
 import Data.Either.Combinators (mapLeft)
 import Data.Function ((&))
-import Data.List (dropWhileEnd, isPrefixOf, maximumBy, minimumBy)
+import Data.List (dropWhileEnd, foldl', isPrefixOf, maximumBy, minimumBy)
 import qualified Data.Map as M
+import qualified Debug.Trace as Trace
 import Text.Read (readEither)
 
 split :: Eq a => a -> [a] -> [[a]]
@@ -74,6 +75,11 @@ safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (a : _) = Just a
 
+safeLast :: [a] -> Maybe a
+safeLast [] = Nothing
+safeLast [a] = Just a
+safeLast (a : rest) = safeLast rest
+
 decide :: a -> a -> Bool -> a
 decide a b cond = if cond then a else b
 
@@ -133,3 +139,14 @@ readWithErrorMessage error input = readEither input & mapLeft (const $ error inp
 
 readInt :: String -> Either String Int
 readInt = readWithErrorMessage $ \input -> "expected an integer but got: \"" <> input <> "\""
+
+trace :: Show a => String -> a -> a
+trace label value = Trace.trace (label <> ": " <> show value) value
+
+reduceR :: (a -> a -> a) -> [a] -> Maybe a
+reduceR fold [] = Nothing
+reduceR fold (first : rest) = Just $ foldr fold first rest
+
+reduceL :: (a -> a -> a) -> [a] -> Maybe a
+reduceL fold [] = Nothing
+reduceL fold (first : rest) = Just $ foldl' fold first rest

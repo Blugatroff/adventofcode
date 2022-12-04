@@ -5,6 +5,7 @@ import Data.Foldable (find)
 import Data.List (elemIndex, findIndex, sort)
 import Data.Maybe (fromMaybe)
 import Util (remove, set, split, trim)
+import GHC.List (foldl')
 
 parseSegments :: String -> [String]
 parseSegments = filter (not . null) . map (trim isSpace) <$> split ' '
@@ -12,7 +13,7 @@ parseSegments = filter (not . null) . map (trim isSpace) <$> split ' '
 parseLine :: String -> ([String], [String])
 parseLine line = case map parseSegments $ split '|' line of
   [a, b] -> (a, b)
-  _ -> error "failed to split once"
+  notAPair -> error "failed to split once"
 
 parse :: String -> [([String], [String])]
 parse input = map parseLine $ filter (not . null) $ map (trim isSpace) $ split '\n' input
@@ -59,12 +60,12 @@ extract f list = case index of
     index = findIndex f list
 
 solveSegments :: [String] -> [String]
-solveSegments segments = snd $ foldl f (segments, map (const "") [0 .. 9]) steps
+solveSegments segments = snd $ foldl' f (segments, map (const "") [0 .. 9]) steps
   where
     f :: ([String], [String]) -> Step -> ([String], [String])
-    f (segments, results) (n, step) = (rem, set n pattern results)
+    f (segments, results) (n, step) = (rem, set n pat results)
       where
-        (rem, pattern) = extract (`step` results) segments
+        (rem, pat) = extract (`step` results) segments
 
 unwrap :: Maybe a -> a
 unwrap (Just a) = a

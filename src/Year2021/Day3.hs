@@ -14,7 +14,7 @@ mostCommon :: [Bool] -> Bool
 mostCommon list = case () of
   () | a == b -> True
   () | a < b -> False
-  _ -> True
+  aGreaterThanB -> True
   where
     a = length (filter id list)
     b = length (filter not list)

@@ -91,7 +91,7 @@ buildPathTreePartTwo hasUsedJoker visited from to cave = do
       Nothing -> Left $ "failed to find node " <> nodeName node
     launchNext (neighbour, usedJoker) = buildPathTreePartTwo usedJoker (from : visited) neighbour to cave <&> (nodeName neighbour,)
     filterNeighbours :: [Node] -> [(Node, Bool)]
-    filterNeighbours neighbours = mapMaybe canBeVisitedAgain neighbours
+    filterNeighbours = mapMaybe canBeVisitedAgain
       where
         canBeVisitedAgain :: Node -> Maybe (Node, Bool)
         canBeVisitedAgain node@(Big _) = Just (node, hasUsedJoker)

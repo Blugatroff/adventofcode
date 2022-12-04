@@ -5,7 +5,7 @@ import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as S
-import Util (chunks, split, trim)
+import Util (chunks, reduceR, split, trim)
 import qualified Util
 
 parsePartOne :: String -> [(String, String)]
@@ -21,15 +21,11 @@ parsePartTwo input =
     & filter (not . null)
     & chunks 3
 
-reduce :: (a -> a -> a) -> [a] -> Maybe a
-reduce fold [] = Nothing
-reduce fold (first : rest) = Just $ foldr fold first rest
-
 findIntersection :: [String] -> [Char]
 findIntersection lists =
   lists
     <&> S.fromList
-    & reduce S.intersection
+    & reduceR S.intersection
     & maybe [] S.toList
 
 priority :: Char -> Int
