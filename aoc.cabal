@@ -37,6 +37,7 @@ executable aoc
         Year2022.Day2
         Year2022.Day3
         Year2022.Day4
+        Year2022.Day5
 
     build-depends:    
         base ^>=4.14.3.0,
@@ -51,7 +52,8 @@ executable aoc
     default-extensions:
         TupleSections,
         LambdaCase,
-        FlexibleContexts
+        FlexibleContexts,
+        ScopedTypeVariables
     ghc-options:
         -fwrite-ide-info
         -hiedir=.hie
