@@ -8,11 +8,7 @@ import qualified Data.Map as M
 import Util (readInt, replace, split, splitOnce, trim)
 import qualified Util
 
-parseLine :: [Char] -> Either String (Maybe Int)
-parseLine [] = Right Nothing
-parseLine s = Just <$> readInt s
-
-transposeStacks :: [String] -> Either String [String]
+transposeStacks :: [String] -> [String]
 transposeStacks input =
   transpose input
     <&> reverse
@@ -20,7 +16,6 @@ transposeStacks input =
     <&> filter (/= '[')
     <&> trim isSpace
     & filter (not . null)
-    & Right
 
 parseStacks :: [String] -> [Stack]
 parseStacks lines = lines <&> drop 1 <&> reverse
@@ -56,9 +51,8 @@ parse input = do
   case splitOnce "" lines of
     Nothing -> Left "failed to find seperation between stacks and moves"
     Just (stacks, moves) -> do
-      stacks <- parseStacks <$> transposeStacks stacks
       moves <- parseMoves moves
-      let stackMap = M.fromList $ zip [1 ..] stacks
+      let stackMap = M.fromList $ zip [1 ..] $ parseStacks $ transposeStacks stacks
       return (stackMap, moves)
 
 applyMove :: ([Char] -> [Char]) -> M.Map Int Stack -> Move -> M.Map Int Stack
