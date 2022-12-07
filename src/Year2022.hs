@@ -7,6 +7,7 @@ import qualified Year2022.Day3 as Day3
 import qualified Year2022.Day4 as Day4
 import qualified Year2022.Day5 as Day5
 import qualified Year2022.Day6 as Day6
+import qualified Year2022.Day7 as Day7
 
 days :: [Day]
 days =
@@ -15,7 +16,8 @@ days =
     Day Day3.partOne Day3.partTwo,
     Day Day4.partOne Day4.partTwo,
     Day Day5.partOne Day5.partTwo,
-    Day Day6.partOne Day6.partTwo
+    Day Day6.partOne Day6.partTwo,
+    Day Day7.partOne Day7.partTwo
   ]
 
 year :: Year

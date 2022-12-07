@@ -150,3 +150,8 @@ reduceR fold (first : rest) = Just $ foldr fold first rest
 reduceL :: (a -> a -> a) -> [a] -> Maybe a
 reduceL fold [] = Nothing
 reduceL fold (first : rest) = Just $ foldl' fold first rest
+
+dropEnd :: [a] -> [a]
+dropEnd [] = []
+dropEnd [x] = []
+dropEnd (x : xs) = x : dropEnd xs
