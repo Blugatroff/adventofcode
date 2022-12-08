@@ -40,6 +40,7 @@ executable aoc
         Year2022.Day5
         Year2022.Day6
         Year2022.Day7
+        Year2022.Day8
 
     build-depends:    
         base ^>=4.14.3.0,
