@@ -94,6 +94,12 @@ mapFst f (a, c) = (f a, c)
 mapSnd :: (a -> b) -> (c, a) -> (c, b)
 mapSnd f (c, a) = (c, f a)
 
+mapBoth :: (a -> b) -> (a, a) -> (b, b)
+mapBoth f (a, b) = (f a, f b)
+
+mapTuple :: (a1 -> a2) -> (b1 -> b2) -> (a1, b1) -> (a2, b2)
+mapTuple fa fb (a, b) = (fa a, fb b)
+
 leftToMaybe :: Either a b -> Maybe a
 leftToMaybe (Left a) = Just a
 leftToMaybe (Right b) = Nothing
@@ -155,3 +161,9 @@ dropEnd :: [a] -> [a]
 dropEnd [] = []
 dropEnd [x] = []
 dropEnd (x : xs) = x : dropEnd xs
+
+mapWithPrevious :: (b -> a -> b) -> b -> [a] -> [b]
+mapWithPrevious f previous [] = []
+mapWithPrevious f previous (x : xs) = v : mapWithPrevious f v xs
+  where
+    v = f previous x
