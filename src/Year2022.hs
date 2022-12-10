@@ -2,6 +2,7 @@ module Year2022 (year) where
 
 import Day (Day (Day), Year (Year))
 import qualified Year2022.Day1 as Day1
+import qualified Year2022.Day10 as Day10
 import qualified Year2022.Day2 as Day2
 import qualified Year2022.Day3 as Day3
 import qualified Year2022.Day4 as Day4
@@ -21,7 +22,8 @@ days =
     Day Day6.partOne Day6.partTwo,
     Day Day7.partOne Day7.partTwo,
     Day Day8.partOne Day8.partTwo,
-    Day Day9.partOne Day9.partTwo
+    Day Day9.partOne Day9.partTwo,
+    Day Day10.partOne Day10.partTwo
   ]
 
 year :: Year

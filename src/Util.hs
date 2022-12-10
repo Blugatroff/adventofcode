@@ -71,6 +71,9 @@ set index v = zipWith f [0 ..]
   where
     f i a = if i == index then v else a
 
+modify :: Int -> (a -> a) -> [a] -> [a]
+modify index f = zipWith (\i a -> if i == index then f a else a) [0 ..]
+
 safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (a : _) = Just a
