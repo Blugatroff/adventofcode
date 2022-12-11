@@ -9,7 +9,7 @@ import Data.Function ((&))
 import Data.Functor (($>), (<&>))
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import Util (remove, set, split, trim)
+import Util (split, trim)
 
 data Node = Small !String | Big !String
   deriving (Eq)

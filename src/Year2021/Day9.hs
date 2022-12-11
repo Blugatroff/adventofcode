@@ -7,7 +7,7 @@ import Data.List (elemIndex, findIndex, foldl', sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Text.Read (readEither)
-import Util (remove, set, split, trim)
+import Util (split, trim)
 
 {- HLINT ignore "Infinite: base/length" -}
 

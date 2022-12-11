@@ -6,7 +6,7 @@ import Data.Functor ((<&>))
 import Data.List (foldl', intercalate)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
-import Util (modify, readInt, safeHead, split, splitOnce, trim)
+import Util (modifyList, readInt, safeHead, split, splitOnce, trim)
 import qualified Util
 
 data Instruction = AddX !Int | NoOp
@@ -43,7 +43,7 @@ applyPending cpu = clearPending $ foldl' (&) cpu $ fromMaybe [] $ safeHead $ pen
     clearPending cpu = cpu {pending = drop 1 $ pending cpu}
 
 extendingModify :: a -> Int -> (a -> a) -> [a] -> [a]
-extendingModify def index f list = take (max (index + 1) (length list)) $ modify index f $ list ++ repeat def
+extendingModify def index f list = take (max (index + 1) (length list)) $ modifyList index f $ list ++ repeat def
 
 addOperation :: Int -> (Cpu -> Cpu) -> Cpu -> Cpu
 addOperation delay operation cpu = cpu {pending = pending cpu & extendingModify [] delay (operation :)}

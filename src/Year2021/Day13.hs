@@ -5,7 +5,7 @@ import Data.Functor ((<&>))
 import Data.List (foldl', isPrefixOf, nub)
 import Data.Maybe (mapMaybe)
 import Text.Read (readEither)
-import Util (leftToMaybe, remove, rightToMaybe, set, split, trim)
+import Util (leftToMaybe, rightToMaybe, split, trim)
 
 data Fold = FoldAlongX !Int | FoldAlongY !Int
   deriving (Show)

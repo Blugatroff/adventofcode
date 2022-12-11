@@ -4,8 +4,8 @@ import Data.Char (digitToInt, isSpace)
 import Data.Foldable (find)
 import Data.List (elemIndex, findIndex, sort)
 import Data.Maybe (fromMaybe)
-import Util (remove, set, split, trim)
 import GHC.List (foldl')
+import Util (removeList, setList, split, trim)
 
 parseSegments :: String -> [String]
 parseSegments = filter (not . null) . map (trim isSpace) <$> split ' '
@@ -54,7 +54,7 @@ steps =
 
 extract :: (a -> Bool) -> [a] -> ([a], a)
 extract f list = case index of
-  Just index -> (remove index list, list !! index)
+  Just index -> (removeList index list, list !! index)
   Nothing -> (list, undefined)
   where
     index = findIndex f list
@@ -63,7 +63,7 @@ solveSegments :: [String] -> [String]
 solveSegments segments = snd $ foldl' f (segments, map (const "") [0 .. 9]) steps
   where
     f :: ([String], [String]) -> Step -> ([String], [String])
-    f (segments, results) (n, step) = (rem, set n pat results)
+    f (segments, results) (n, step) = (rem, setList n pat results)
       where
         (rem, pat) = extract (`step` results) segments
 

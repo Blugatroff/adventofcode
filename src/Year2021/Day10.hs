@@ -6,7 +6,7 @@ import Data.Function ((&))
 import Data.List (elemIndex, findIndex, sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import Util (remove, set, split, trim)
+import Util (split, trim)
 
 parse :: String -> [[Char]]
 parse input =
