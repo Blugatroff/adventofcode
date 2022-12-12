@@ -119,6 +119,10 @@ minimumByKey :: Ord b => (a -> b) -> [a] -> Maybe a
 minimumByKey key [] = Nothing
 minimumByKey key list = Just $ minimumBy (\a b -> compare (key a) (key b)) list
 
+safeMinimum :: Ord a => [a] -> Maybe a
+safeMinimum [] = Nothing
+safeMinimum list = Just $ minimum list
+
 maybeToRight :: e -> Maybe a -> Either e a
 maybeToRight error Nothing = Left error
 maybeToRight error (Just value) = Right value

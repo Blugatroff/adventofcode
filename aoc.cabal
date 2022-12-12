@@ -15,6 +15,7 @@ executable aoc
         Year2021
         Year2022
         Day
+        Dijkstra
         Year2021.Day1
         Year2021.Day2
         Year2021.Day3
@@ -44,6 +45,7 @@ executable aoc
         Year2022.Day9
         Year2022.Day10
         Year2022.Day11
+        Year2022.Day12
 
     build-depends:    
         base ^>=4.14.3.0,
