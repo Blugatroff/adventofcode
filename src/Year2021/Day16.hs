@@ -2,14 +2,13 @@
 
 module Year2021.Day16 (partOne, partTwo) where
 
-import Control.Monad.Except (ExceptT (ExceptT), lift, runExceptT)
-import Control.Monad.State (MonadState (put), State, evalState, get, gets, modify, runState)
-import Control.Monad.Trans.Except (except, throwE)
-import Data.Bits (shiftL, (.&.), (.|.))
+import Control.Monad.Except (ExceptT, lift, runExceptT)
+import Control.Monad.State (MonadState (put), State, evalState, get, gets, modify)
+import Control.Monad.Trans.Except (throwE)
+import Data.Bits (shiftL, (.|.))
 import Data.Function ((&))
 import Data.Functor (($>), (<&>))
 import Data.List (foldl')
-import GHC.IO (unsafePerformIO)
 
 data Bit = Zero | One
 
@@ -106,11 +105,6 @@ parseManyPackets =
       packet <- parsePacket
       parseManyPackets <&> (packet :)
 
-inspect :: Applicative m => Show a => String -> a -> ExceptT e m a
-inspect name value = unsafePerformIO $ do
-  putStrLn $ name <> ": " <> show value
-  return $ ExceptT (pure (Right value))
-
 parseOperatorB :: OperatorType -> Int -> ExceptT String (State Bits) Packet
 parseOperatorB opType version = do
   length <- lift $ bitsToInt <$> takeN 15
@@ -146,15 +140,6 @@ parsePacket = do
   parseOperatorType >>= \case
     Nothing -> parseLiteral version
     Just opType -> parseOperator opType version
-
-operatorTypeId :: OperatorType -> Int
-operatorTypeId Sum = 0
-operatorTypeId Product = 1
-operatorTypeId Minimum = 2
-operatorTypeId Maximum = 3
-operatorTypeId Greater = 5
-operatorTypeId Less = 6
-operatorTypeId Equal = 7
 
 evalPacket :: Packet -> Int
 evalPacket (Literal _ value) = value

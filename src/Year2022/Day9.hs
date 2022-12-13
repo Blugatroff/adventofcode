@@ -6,8 +6,7 @@ import Data.Functor ((<&>))
 import Data.List (foldl')
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.List.NonEmpty as NE
-import Util (dedup, mapFst, mapSnd, mapWithPrevious, readInt, sign, split, splitOnce, trace, trim)
-import qualified Util
+import Util (dedup, mapFst, mapSnd, mapWithPrevious, readInt, sign, split, splitOnce, trim)
 
 data Instruction = U | D | L | R
   deriving (Show)

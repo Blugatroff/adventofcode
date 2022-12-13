@@ -1,12 +1,7 @@
 module Year2022.Day6 (partOne, partTwo) where
 
-import Data.Char (isSpace)
 import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.Maybe (fromMaybe)
 import qualified Data.Set as S
-import Util (readInt, split, trim)
-import qualified Util
 
 windows :: Int -> [a] -> [[a]]
 windows _ [] = []

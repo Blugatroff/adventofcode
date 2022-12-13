@@ -3,10 +3,7 @@ module Year2022.Day4 (partOne, partTwo) where
 import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.List (intersperse, sort)
-import Data.Maybe (fromMaybe)
 import Util (readInt, split, splitOnce, trim)
-import qualified Util
 
 type Range = (Int, Int)
 

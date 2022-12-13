@@ -8,7 +8,6 @@ import Data.List (foldl', sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Util (dropEnd, readInt, safeHead, split, splitOnce, trim)
-import qualified Util
 
 data CdTarget = TargetUp | TargetRoot | TargetDown !String
   deriving (Show)
@@ -18,8 +17,6 @@ data TerminalLine = LsLine | CdLine !CdTarget | FileLine !String !Int | DirLine 
 
 data FileSystem = Directory !(M.Map String FileSystem) | File !String !Int
   deriving (Show)
-
-data Command = Ls !String ![Either String (String, Int)] | Cd !CdTarget | Dir !String
 
 parseLine :: String -> Either String TerminalLine
 parseLine line@('$' : command) = case trim isSpace command of
@@ -40,11 +37,6 @@ parse input = split '\n' input <&> trim isSpace & traverse parseLine
 fileSystemSize :: FileSystem -> Int
 fileSystemSize (File _ size) = size
 fileSystemSize (Directory entries) = M.assocs entries <&> snd <&> fileSystemSize & sum
-
-getEntry :: [String] -> FileSystem -> Maybe FileSystem
-getEntry [] system = Just system
-getEntry (next : rest) (File _ _) = Nothing
-getEntry (next : rest) (Directory entries) = M.lookup next entries >>= getEntry rest
 
 insertEntry :: [String] -> (Maybe FileSystem -> FileSystem) -> FileSystem -> FileSystem
 insertEntry [] new sys = new $ Just sys

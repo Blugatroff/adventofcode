@@ -1,8 +1,7 @@
 module Year2021.Day1 (partOne, partTwo) where
 
 import Data.Foldable (Foldable (foldl'))
-import Data.Maybe (fromMaybe, mapMaybe, maybeToList)
-import Text.Read (readEither, readMaybe)
+import Text.Read (readEither)
 import qualified Util
 
 parse :: String -> Either String [Int]

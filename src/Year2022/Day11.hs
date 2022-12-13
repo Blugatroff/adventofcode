@@ -6,9 +6,7 @@ import Data.Foldable (forM_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (sort)
-import Data.Maybe (fromMaybe)
 import Util (modifyList, readInt, split, splitOnce, splitSeq, trim)
-import qualified Util
 
 data OperationArgument = OldValue | Number !Int deriving (Show)
 

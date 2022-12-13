@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 module Util where
 
 import Data.Either.Combinators (mapLeft)

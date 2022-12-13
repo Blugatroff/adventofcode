@@ -1,6 +1,5 @@
 module Year2021.Day15 (partOne, partTwo) where
 
-import Control.Monad.State (State)
 import Data.Array ((!))
 import qualified Data.Array as A
 import Data.Char (isSpace)

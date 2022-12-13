@@ -1,15 +1,11 @@
 module Year2021.Day9 (partOne, partTwo) where
 
-import Data.Char (digitToInt, isSpace)
-import Data.Foldable (find)
 import Data.Function ((&))
-import Data.List (elemIndex, findIndex, foldl', sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Text.Read (readEither)
-import Util (split, trim)
-
-{- HLINT ignore "Infinite: base/length" -}
+import Util (split)
+import Data.List (sort, foldl')
 
 parse :: String -> Either String [[Int]]
 parse input =

@@ -1,19 +1,10 @@
 module Year2021.Day7 (partOne, partTwo) where
 
 import Text.Read (readEither)
-import Util
+import Util (split)
 
 parse :: String -> Either String [Int]
 parse input = traverse readEither $ split ',' input
-
-divRound :: Int -> Int -> Int
-divRound a b = if m >= h then (a `div` b) + 1 else a `div` b
-  where
-    m = a `mod` b
-    h = b `div` 2
-
-average :: [Int] -> Int
-average list = (`divRound` length list) $ sum list
 
 distance :: Int -> Int -> Int
 distance a = abs . (-) a

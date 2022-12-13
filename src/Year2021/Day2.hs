@@ -30,7 +30,7 @@ solvePartOne commands = uncurry (*) $ foldl' f (0, 0) commands
 solvePartTwo :: [Command] -> Int
 solvePartTwo commands = x * y
   where
-    (aim, x, y) = foldl' f (0, 0, 0) commands
+    (_, x, y) = foldl' f (0, 0, 0) commands
     f :: (Int, Int, Int) -> Command -> (Int, Int, Int)
     f (aim, x, y) (Down n) = (aim + n, x, y)
     f (aim, x, y) (Up n) = (aim - n, x, y)

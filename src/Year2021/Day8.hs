@@ -1,9 +1,7 @@
 module Year2021.Day8 (partOne, partTwo) where
 
-import Data.Char (digitToInt, isSpace)
-import Data.Foldable (find)
+import Data.Char (isSpace)
 import Data.List (elemIndex, findIndex, sort)
-import Data.Maybe (fromMaybe)
 import GHC.List (foldl')
 import Util (removeList, setList, split, trim)
 
@@ -60,7 +58,7 @@ extract f list = case index of
     index = findIndex f list
 
 solveSegments :: [String] -> [String]
-solveSegments segments = snd $ foldl' f (segments, map (const "") [0 .. 9]) steps
+solveSegments segments = snd $ foldl' f (segments, replicate 10 "") steps
   where
     f :: ([String], [String]) -> Step -> ([String], [String])
     f (segments, results) (n, step) = (rem, setList n pat results)

@@ -1,22 +1,17 @@
 module Main (main) where
 
-import Control.Exception (SomeException (SomeException), try)
-import Control.Monad (void)
-import Data.Either.Combinators (mapLeft)
-import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (find)
 import Data.Maybe
 import Day (Day (partOne, partTwo), Part, Year (days, name))
-import GHC.IO.Exception (IOException (IOError))
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
-import Text.Read (readEither)
 import Util (readInt)
 import qualified Year2021
 import qualified Year2022
+import Control.Exception (try)
 
 data PartName = PartOne | PartTwo
   deriving (Show)
@@ -29,19 +24,14 @@ data InputSource = Stdin | File
 
 data Args
   = Help
-  | Args
-      { yearIndex :: !Year,
-        dayIndex :: !DayIndex,
-        partName :: !(Maybe PartName),
-        inputSource :: !InputSource
-      }
+  | Args !Year !DayIndex !(Maybe PartName) !InputSource
   deriving (Show)
 
 validateDay :: [Day] -> Int -> Either String DayIndex
 validateDay days day
   | day - 1 >= length days || day <= 0 =
     Left $ "day must be above 0 and below " <> show (length days + 1)
-validateDay days day = Right $ DayIndex $ day - 1
+validateDay _ day = Right $ DayIndex $ day - 1
 
 validateYear :: Int -> Either String Year
 validateYear yearName = case find (\year -> name year == yearName) years of
@@ -51,7 +41,9 @@ validateYear yearName = case find (\year -> name year == yearName) years of
 parseArgs :: [String] -> Either String Args
 parseArgs [] = Right Help
 parseArgs ["--help"] = Right Help
-parseArgs ("--stdin" : rest) = parseArgs rest <&> \args -> args {inputSource = Stdin}
+parseArgs ("--stdin" : rest) = parseArgs rest <&> \case 
+  Help -> Help
+  Args y d p _ -> Args y d p Stdin
 parseArgs [year, day] = do
   year <- readInt year >>= validateYear
   day <- readInt day >>= validateDay (days year)
@@ -98,15 +90,15 @@ start (Args year (DayIndex dayIndex) part source) = do
       result <- try (readFile path) :: IO (Either IOError String)
       case result of
         Right contents -> return contents
-        Left error | isDoesNotExistError error -> do
+        Left e | isDoesNotExistError e -> do
           putStrLn $ "Attempted to read the puzzle input from \"" <> path <> " but the file does not exist!"
           exitFailure
-        Left error -> do
+        Left _ -> do
           putStrLn $ "Failed to read the file: \"" <> path <> "\"!"
           exitFailure
 
   case solveFn input of
-    Left error -> abort $ "Error: " <> error
+    Left e -> abort $ "Error: " <> e
     Right result -> putStrLn $ "Result: \n" <> result
 
 main :: IO ()

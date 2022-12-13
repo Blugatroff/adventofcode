@@ -3,10 +3,8 @@ module Year2022.Day3 (partOne, partTwo) where
 import Data.Char (isAsciiLower, isAsciiUpper, isSpace, ord)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.Maybe (fromMaybe)
 import qualified Data.Set as S
 import Util (chunks, reduceR, split, trim)
-import qualified Util
 
 parsePartOne :: String -> [(String, String)]
 parsePartOne input =

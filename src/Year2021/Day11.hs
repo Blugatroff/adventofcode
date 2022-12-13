@@ -1,4 +1,4 @@
-module Year2021.Day11 where
+module Year2021.Day11 (partOne, partTwo) where
 
 import Data.Function ((&))
 import Text.Read (readEither)
@@ -53,9 +53,9 @@ step grid = f (increment grid)
     fold (x, y) (grid, flashed) = (flash grid x y, flashed + 1)
 
 solvePartOne :: Grid -> Int
-solvePartOne grid = snd $ foldr fold (grid, 0) [1 .. 100]
+solvePartOne grid = snd $ head $ drop 100 $ iterate runStep (grid, 0)
   where
-    fold _ (grid, flashes) = step grid & mapSnd (+ flashes)
+    runStep (grid, flashes) = step grid & mapSnd (+ flashes)
 
 solvePartTwo :: Grid -> Int
 solvePartTwo = f 1

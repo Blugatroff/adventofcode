@@ -1,15 +1,11 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-{-# HLINT ignore "Use if" #-}
-
 module Year2021.Day12 (partOne, partTwo) where
 
 import Data.Char (isUpper)
 import Data.Function ((&))
-import Data.Functor (($>), (<&>))
+import Data.Functor ((<&>))
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe, mapMaybe)
-import Util (split, trim)
+import Data.Maybe (mapMaybe)
+import Util (split)
 
 data Node = Small !String | Big !String
   deriving (Eq)
@@ -19,8 +15,6 @@ type Link = (Node, Node)
 type Cave = M.Map String [Node]
 
 type Visited = [Node]
-
-type Path = [Node]
 
 data PathTree = Arrived | Branches ![(String, PathTree)]
   deriving (Show)

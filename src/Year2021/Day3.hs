@@ -1,7 +1,6 @@
 module Year2021.Day3 (partOne, partTwo) where
 
-import Data.List
-import GHC.Base
+import Data.List (transpose)
 import Util
 
 parseLine :: String -> [Bool]

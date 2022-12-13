@@ -6,9 +6,8 @@ import Data.Functor ((<&>))
 import Data.List (sort)
 import Data.Maybe (fromMaybe)
 import Util (readInt, split, trim)
-import qualified Util
 
-parseLine :: [Char] -> Either String (Maybe Int)
+parseLine :: String -> Either String (Maybe Int)
 parseLine [] = Right Nothing
 parseLine s = Just <$> readInt s
 

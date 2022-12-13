@@ -6,8 +6,7 @@ import Data.Functor ((<&>))
 import Data.List (foldl', intercalate)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
-import Util (modifyList, readInt, safeHead, split, splitOnce, trim)
-import qualified Util
+import Util (modifyList, readInt, split, splitOnce, trim)
 
 data Instruction = AddX !Int | NoOp
   deriving (Show)
@@ -36,12 +35,6 @@ data Cpu = Cpu
 modifyXRegister :: (Int -> Int) -> Cpu -> Cpu
 modifyXRegister f cpu = cpu {xRegister = f $ xRegister cpu}
 
-applyPending :: Cpu -> Cpu
-applyPending cpu = clearPending $ foldl' (&) cpu $ fromMaybe [] $ safeHead $ pending cpu
-  where
-    clearPending :: Cpu -> Cpu
-    clearPending cpu = cpu {pending = drop 1 $ pending cpu}
-
 extendingModify :: a -> Int -> (a -> a) -> [a] -> [a]
 extendingModify def index f list = take (max (index + 1) (length list)) $ modifyList index f $ list ++ repeat def
 
@@ -50,12 +43,6 @@ addOperation delay operation cpu = cpu {pending = pending cpu & extendingModify 
 
 increaseCycleCounter :: Cpu -> Cpu
 increaseCycleCounter cpu = cpu {cycleNumber = 1 + cycleNumber cpu}
-
-flushPending :: Cpu -> Cpu
-flushPending cpu =
-  if null (pending cpu)
-    then cpu
-    else flushPending $ increaseCycleCounter $ applyPending cpu
 
 executeCycle :: Cpu -> Maybe Cpu
 executeCycle cpu =

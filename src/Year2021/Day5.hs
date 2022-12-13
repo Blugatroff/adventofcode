@@ -1,8 +1,7 @@
 module Year2021.Day5 (partOne, partTwo) where
 
-import Data.List
 import Text.Read (readEither)
-import Util
+import Util (split, splitSeq, dedup, sign)
 
 type Point = (Int, Int)
 

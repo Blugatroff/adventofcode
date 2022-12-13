@@ -8,7 +8,6 @@ import Data.Functor ((<&>))
 import Data.List (find, foldl', sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe, mapMaybe)
-import Text.Read (readEither)
 import Util
   ( applyN,
     dedup,

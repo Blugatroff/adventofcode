@@ -1,6 +1,6 @@
 module Year2021.Day4 (partOne, partTwo) where
 
-import Data.List
+import Data.List (find, intercalate, intersperse, transpose)
 import Text.Read (readEither)
 import Util
 
@@ -41,9 +41,6 @@ chunksOf size list = if null b then [a] else a : chunksOf size b
 
 parseBoard :: [String] -> Either String Board
 parseBoard lines = Board <$> traverse (traverse (fmap (Slot False) . readEither) . split ' ' . replaceUntilNoChange "  " " ") lines
-
-trimSpaces :: String -> String
-trimSpaces = trim (== ' ')
 
 parse :: String -> Either String Game
 parse s = do

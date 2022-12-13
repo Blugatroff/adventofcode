@@ -1,12 +1,10 @@
 module Year2021.Day10 (partOne, partTwo) where
 
-import Data.Char (digitToInt, isControl, isSpace)
 import Data.Foldable (find)
 import Data.Function ((&))
-import Data.List (elemIndex, findIndex, sort)
-import qualified Data.Map as M
+import Data.List (sort)
 import Data.Maybe (fromMaybe, mapMaybe)
-import Util (split, trim)
+import Util (split)
 
 parse :: String -> [[Char]]
 parse input =

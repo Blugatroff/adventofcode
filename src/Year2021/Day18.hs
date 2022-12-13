@@ -3,22 +3,17 @@ module Year2021.Day18 (partOne, partTwo) where
 import Control.Applicative ((<|>))
 import Control.Monad.State (StateT, evalStateT, get, lift, put)
 import Control.Monad.State.Class (MonadState)
-import Data.Char (isDigit, isSpace)
+import Data.Char (isDigit)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.Maybe (catMaybes, fromMaybe)
-import Text.Read (readEither)
+import Data.Maybe (fromMaybe)
 import Util
   ( mapFst,
     readInt,
     reduceL,
     safeHead,
     safeLast,
-    sign,
     split,
-    splitOnce,
-    splitSeqOnce,
-    trim,
   )
 import qualified Util
 
@@ -68,9 +63,9 @@ parseElement =
     ('[' : rest) -> do
       put rest
       elem1 <- parseElement
-      parseChar ','
+      _ <- parseChar ','
       elem2 <- parseElement
-      parseChar ']'
+      _ <- parseChar ']'
       return $ Pair elem1 elem2
     (first : rest)
       | isDigit first -> Number <$> parseInt
@@ -113,18 +108,6 @@ replaceElement (RightSide loc) new (Number n) = (Number n, Nothing)
 replaceElement (LeftSide loc) new (Number n) = (Number n, Nothing)
 replaceElement (LeftSide loc) new (Pair left right) = replaceElement loc new left & mapFst (`Pair` right)
 replaceElement (RightSide loc) new (Pair left right) = replaceElement loc new right & mapFst (Pair left)
-
-leftMostNumber :: Element -> Maybe Location
-leftMostNumber (Number n) = Just Here
-leftMostNumber (Pair left right) =
-  (LeftSide <$> leftMostNumber left)
-    <|> (RightSide <$> leftMostNumber right)
-
-rightMostNumber :: Element -> Maybe Location
-rightMostNumber (Number n) = Just Here
-rightMostNumber (Pair left right) =
-  (RightSide <$> rightMostNumber right)
-    <|> (LeftSide <$> rightMostNumber left)
 
 explode :: Location -> Element -> Element
 explode location element = case explodingPair of
@@ -195,11 +178,6 @@ splitElement location = fst . replaceElement location splitter
     splitter (Number n) = Pair (Number (n `div` 2)) (Number (n - (n `div` 2)))
     splitter element = element
 
-locationDepth :: Location -> Int
-locationDepth Here = 0
-locationDepth (LeftSide loc) = 1 + locationDepth loc
-locationDepth (RightSide loc) = 1 + locationDepth loc
-
 isPair :: Element -> Bool
 isPair (Pair left right) = True
 isPair (Number n) = False
@@ -222,11 +200,6 @@ findBigRegularNumbers = map fst . filter (test . snd) . elementsWithLocation
     test (Number n) | n >= 10 = True
     test notABigNumber = False
 
-solveLine :: Element -> String
-solveLine element = exploding <&> (`explode` element) & show
-  where
-    exploding = safeHead (map fst $ filter (isPair . snd) $ inDepth 4 element)
-
 reduceElement :: Element -> Element
 reduceElement element = maybe element reduceElement (step element)
   where
@@ -245,9 +218,6 @@ addElements a b = reduceElement $ Pair a b
 magnitude :: Element -> Int
 magnitude (Number n) = n
 magnitude (Pair left right) = 3 * magnitude left + 2 * magnitude right
-
--- >>> 5
---
 
 solvePartOne :: [Element] -> Int
 solvePartOne elements = reduceL addElements elements & maybe 0 magnitude

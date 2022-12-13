@@ -12,7 +12,6 @@ import Dijkstra
     findSolutionFrom,
   )
 import Util (safeHead, safeMinimum, split, trim)
-import qualified Util
 
 data HeightMapCell = Start | End | Height !Int
   deriving (Eq, Show)

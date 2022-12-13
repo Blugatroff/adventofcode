@@ -3,11 +3,9 @@ module Year2022.Day8 (partOne, partTwo) where
 import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.List (sort)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
-import Util (readInt, split, trace, trim)
-import qualified Util
+import Util (readInt, split, trim)
 
 type Grid = M.Map (Int, Int) Int
 
