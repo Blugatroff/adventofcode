@@ -14,8 +14,8 @@ import Util
     safeHead,
     safeLast,
     split,
+    safeMaximum
   )
-import qualified Util
 
 data Element = Number !Int | Pair !Element !Element
   deriving (Eq)
@@ -229,7 +229,7 @@ solvePartTwo :: [Element] -> Int
 solvePartTwo elements =
   everyPair elements
     & map (magnitude . uncurry addElements)
-    & Util.maximum
+    & safeMaximum
     & fromMaybe 0
 
 partOne :: String -> Either String String

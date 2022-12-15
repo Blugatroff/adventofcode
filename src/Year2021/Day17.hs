@@ -6,7 +6,7 @@ import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Maybe (catMaybes, fromMaybe)
 import Text.Read (readEither)
-import Util (maximum, maximumByKey, maybeToRight, sign, splitOnce, splitSeqOnce, trim)
+import Util (safeMaximum, maximumByKey, maybeToRight, sign, splitOnce, splitSeqOnce, trim)
 import Prelude hiding (maximum)
 
 data Target = Target {minX :: !Int, maxX :: !Int, minY :: !Int, maxY :: !Int}
@@ -59,7 +59,7 @@ shoot target (point, velocity)
   | otherwise = step (point, velocity) & shoot target <&> ((point, velocity) :)
 
 shotScore :: Shot -> Int
-shotScore steps = steps <&> fst <&> snd & maximum & fromMaybe 0
+shotScore steps = steps <&> fst <&> snd & safeMaximum & fromMaybe 0
 
 findBestShot :: [Shot] -> Maybe (Int, Shot)
 findBestShot shots = shots <&> (\shot -> (shotScore shot, shot)) & maximumByKey fst

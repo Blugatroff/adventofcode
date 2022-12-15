@@ -2,7 +2,7 @@ module Year2021.Day4 (partOne, partTwo) where
 
 import Data.List (find, intercalate, intersperse, transpose)
 import Text.Read (readEither)
-import Util
+import Util (split, lpad, replace, trim)
 
 data Slot = Slot !Bool !Int
 
@@ -44,12 +44,14 @@ parseBoard lines = Board <$> traverse (traverse (fmap (Slot False) . readEither)
 
 parse :: String -> Either String Game
 parse s = do
+  (drawsLine, boardLines) <- case lines of
+    a : b -> return (a, b)
+    lines -> Left $ "input is incomplete:\n" <> s
   draws <- traverse readEither $ split ',' drawsLine
   boards <- traverse parseBoard $ chunksOf 5 $ map (trim (== ' ')) boardLines
   return $ Game draws boards
   where
     lines = filter (not . null) $ split '\n' s
-    (drawsLine : boardLines) = lines
 
 playRound :: Int -> Board -> Board
 playRound draw = Board . map (map mapSlot) . slots

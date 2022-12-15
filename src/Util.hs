@@ -124,6 +124,10 @@ safeMinimum :: Ord a => [a] -> Maybe a
 safeMinimum [] = Nothing
 safeMinimum list = Just $ minimum list
 
+safeMaximum :: Ord a => [a] -> Maybe a
+safeMaximum [] = Nothing
+safeMaximum list = Just $ maximum list
+
 maybeToRight :: e -> Maybe a -> Either e a
 maybeToRight error Nothing = Left error
 maybeToRight error (Just value) = Right value
@@ -143,10 +147,6 @@ sign :: Int -> Int
 sign n | n > 0 = 1
 sign n | n < 0 = -1
 sign n = 0
-
-maximum :: Ord a => [a] -> Maybe a
-maximum [] = Nothing
-maximum list = Just $ Prelude.maximum list
 
 readWithErrorMessage :: (String -> String) -> String -> Either String Int
 readWithErrorMessage error input = readEither input & mapLeft (const $ error input)
