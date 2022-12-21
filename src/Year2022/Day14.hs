@@ -109,12 +109,11 @@ solvePartOne paths = flip evalState M.empty $ do
                 True -> return 0
                 False -> untilAbyss abyss <&> (+1)
 
-solvePartTwo :: [Path] -> String
+solvePartTwo :: [Path] -> Int
 solvePartTwo paths = flip evalState M.empty $ do
     insertPaths paths
     floor <- get <&> (+2) . findAbyss
-    count <- untilFull floor
-    get <&> drawCave <&> (<> "\n" <> show count)
+    untilFull floor
     where
         untilFull :: Int -> State Cave Int
         untilFull floor = do
@@ -128,5 +127,5 @@ partOne :: String -> Either String String
 partOne input = parse input <&> solvePartOne
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo
+partTwo input = parse input <&> solvePartTwo <&> show
 

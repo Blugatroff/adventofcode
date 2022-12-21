@@ -65,16 +65,12 @@ onTop :: M.Map Int Stack -> String
 onTop stacks = M.elems stacks >>= take 1
 
 solve :: ([Char] -> [Char]) -> (M.Map Int Stack, [Move]) -> String
-solve reverseOrNot (stacks, moves) = output ++ onTop outputStacks
+solve reverseOrNot (stacks, moves) = onTop outputStacks
   where
-    (_, output, outputStacks) = foldl' folder (0, "", stacks) moves
+    (_, outputStacks) = foldl' folder (0, stacks) moves
 
-    numberMoves = length moves
-
-    folder :: (Int, String, M.Map Int [Char]) -> Move -> (Int, String, M.Map Int [Char])
-    folder (i, output, stacks) move = (i + 1, output ++ message, applyMove reverseOrNot stacks move)
-      where
-        message = show i <> "/" <> show numberMoves <> "\n"
+    folder :: (Int, M.Map Int [Char]) -> Move -> (Int, M.Map Int [Char])
+    folder (i, stacks) move = (i + 1, applyMove reverseOrNot stacks move)
 
 solvePartOne :: (M.Map Int Stack, [Move]) -> String
 solvePartOne = solve reverse
