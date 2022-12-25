@@ -7,84 +7,76 @@ module Dijkstra
   )
 where
 
+import Data.Functor ((<&>))
+import Data.Function ((&))
 import Data.Maybe (catMaybes)
 import qualified Data.Heap as Heap
 import qualified Data.Set as Set
 
-class World world where
-  lookupCell :: (Int, Int) -> world -> Maybe Cell
-  movePossible :: Maybe (Int, Int) -> (Int, Int) -> world -> Bool
+class World world pos where
+  lookupCell :: pos -> world -> Maybe Cell
+  adjacentCells :: pos -> world -> [pos]
 
-data Solution = Solution {path :: [(Int, Int)], cost :: Int}
+data Solution pos = Solution {path :: [pos], cost :: Int}
+  deriving(Show)
 
 data Cell = Destination !Int | Cell !Int
+  deriving(Show)
 
 cellCost :: Cell -> Int
 cellCost (Destination cost) = cost
 cellCost (Cell cost) = cost
 
-data Path = PathEnd !(Maybe Path) !Int !Int !Int !Int | PathBranch !(Maybe Path) !Int !Int !Int [Path]
+data Path pos = PathEnd !(Maybe (Path pos)) !pos !Int !Int | PathBranch !(Maybe (Path pos)) !pos !Int [Path pos]
 
-instance Show Path where
-  show (PathEnd _ x y cost cellCost) = "(PathEnd " <> show x <> " " <> show y <> " " <> show cost <> " " <> show cellCost <> ")"
-  show (PathBranch _ x y cost _) = "(PathBranch " <> show x <> " " <> show y <> " " <> show cost <> ")"
+instance Show pos => Show (Path pos) where
+  show (PathEnd _ pos cost cellCost) = "(PathEnd " <> show pos <> " " <> show cost <> " " <> show cellCost <> ")"
+  show (PathBranch _ pos cost _) = "(PathBranch " <> show pos <> " " <> show cost <> ")"
 
-instance Eq Path where
-  (PathBranch parent1 x1 y1 cost1 _) == (PathBranch parent2 x2 y2 cost2 _) = x1 == x2 && y1 == y2 && cost1 == cost2 && parent1 == parent2
-  (PathEnd parent1 x1 y1 cost1 cellCost1) == (PathEnd parent2 x2 y2 cost2 cellCost2) = x1 == x2 && y1 == y2 && cost1 == cost2 && cellCost1 == cellCost2 && parent1 == parent2
+instance Eq pos => Eq (Path pos) where
+  (PathBranch parent1 pos1 cost1 _) == (PathBranch parent2 pos2 cost2 _) = pos1 == pos2 && cost1 == cost2 && parent1 == parent2
+  (PathEnd parent1 pos1 cost1 cellCost1) == (PathEnd parent2 pos2 cost2 cellCost2) = pos1 == pos2 && cost1 == cost2 && cellCost1 == cellCost2 && parent1 == parent2
   _ == _ = False
 
-instance Ord Path where
-  compare (PathEnd _ _ _ cost1 _) (PathEnd _ _ _ cost2 _) = compare cost1 cost2
-  compare (PathBranch _ _ _ cost1 _) (PathBranch _ _ _ cost2 _) = compare cost1 cost2
-  compare (PathBranch _ _ _ cost1 _) (PathEnd _ _ _ cost2 _) = compare cost1 cost2
-  compare (PathEnd _ _ _ cost1 _) (PathBranch _ _ _ cost2 _) = compare cost1 cost2
+instance Eq pos => Ord (Path pos) where
+  compare (PathEnd _ _ cost1 _) (PathEnd _ _ cost2 _) = compare cost1 cost2
+  compare (PathBranch _ _ cost1 _) (PathBranch _ _ cost2 _) = compare cost1 cost2
+  compare (PathBranch _ _ cost1 _) (PathEnd _ _ cost2 _) = compare cost1 cost2
+  compare (PathEnd _ _ cost1 _) (PathBranch _ _ cost2 _) = compare cost1 cost2
 
-pathPosition :: Path -> (Int, Int)
-pathPosition (PathBranch _ x y _ _) = (x, y)
-pathPosition (PathEnd _ x y _ _) = (x, y)
+findPaths :: World world pos => Maybe (Path pos) -> (pos, Int) -> world -> Maybe (Path pos)
+findPaths previous (pos, cost) world = 
+  lookupCell pos world <&> \cell -> let
+    thisCost = cellCost cell
 
-findPaths :: World world => Maybe Path -> (Int, Int, Int) -> world -> Maybe Path
-findPaths previous (x, y, cost) world = case lookupCell (x, y) world of
-  Nothing -> Nothing
-  Just cell -> this cell
-  where
-    this cell =
-      if movePossible (pathPosition <$> previous) (x, y) world
-        then Just this
-        else Nothing
-      where
-        this = case cell of
-          Destination _ -> PathEnd previous x y cost thisCost
-          _ -> PathBranch previous x y cost next
+    next = adjacentCells pos world 
+      <&> (\p -> findPaths (Just this) (p, cost + thisCost) world) 
+      & catMaybes
+    
+    this = case cell of
+      Destination _ -> PathEnd previous pos cost thisCost
+      _ -> PathBranch previous pos cost next
+    in this
+    
 
-        thisCost = cellCost cell
+type PathQueue pos = Heap.Heap (Path pos)
 
-        next = catMaybes [left, right, up, down]
+type Visited pos = Set.Set pos
 
-        left = findPaths (Just this) (x - 1, y, cost + thisCost) world
-        right = findPaths (Just this) (x + 1, y, cost + thisCost) world
-        up = findPaths (Just this) (x, y - 1, cost + thisCost) world
-        down = findPaths (Just this) (x, y + 1, cost + thisCost) world
-
-type PathQueue = Heap.Heap Path
-
-type Visited = Set.Set (Int, Int)
-
-evaluateNextBranch :: PathQueue -> Visited -> Maybe Solution
+evaluateNextBranch :: (Show pos, Ord pos) => PathQueue pos -> Visited pos -> Maybe (Solution pos)
 evaluateNextBranch queue visited = case Heap.viewMin queue of
   Nothing -> Nothing
-  Just (PathEnd p x y cost cellCost, _) -> Just $ Solution (reverse $ (x, y) : maybe [] buildPath p) (cost + cellCost)
-  Just (PathBranch _ x y _ next, remainingQueue) ->
-    if Set.member (x, y) visited
+  Just (PathEnd p pos cost cellCost, _) -> Just $ Solution (reverse $ pos : maybe [] buildPath p) (cost + cellCost)
+  Just (PathBranch _ pos _ next, remainingQueue) ->
+    if Set.member pos visited
       then evaluateNextBranch remainingQueue visited
-      else evaluateNextBranch (foldr Heap.insert remainingQueue next) (Set.insert (x, y) visited)
+      else evaluateNextBranch (foldr Heap.insert remainingQueue next) (Set.insert pos visited)
 
-buildPath :: Path -> [(Int, Int)]
-buildPath (PathEnd previous x y _ _) = (x, y) : maybe [] buildPath previous
-buildPath (PathBranch previous x y _ _) = (x, y) : maybe [] buildPath previous
+buildPath :: Path pos -> [pos]
+buildPath (PathEnd previous pos _ _) = pos : maybe [] buildPath previous
+buildPath (PathBranch previous pos _ _) = pos : maybe [] buildPath previous
 
-findSolutionFrom :: World world => world -> (Int, Int) -> Maybe Solution
-findSolutionFrom world (x, y) = do
-  root <- findPaths Nothing (x, y, 0) world
+findSolutionFrom :: (Show pos, Ord pos, World world pos) => world -> pos -> Maybe (Solution pos)
+findSolutionFrom world pos = do
+  root <- findPaths Nothing (pos, 0) world
   evaluateNextBranch (Heap.singleton root) Set.empty

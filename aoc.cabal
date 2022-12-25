@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -48,6 +48,7 @@ executable aoc-exe
       Year2022.Day13
       Year2022.Day14
       Year2022.Day15
+      Year2022.Day16
       Year2022.Day2
       Year2022.Day3
       Year2022.Day4
@@ -60,8 +61,8 @@ executable aoc-exe
   hs-source-dirs:
       src
   default-extensions:
-      TupleSections LambdaCase FlexibleContexts
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wno-name-shadowing -Wno-unused-matches -threaded -rtsopts -with-rtsopts=-N
+      TupleSections LambdaCase FlexibleContexts MultiParamTypeClasses FlexibleInstances ImportQualifiedPost
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wno-name-shadowing -Wno-unused-matches -O2
   build-depends:
       array
     , base >=4.7 && <5

@@ -8,7 +8,7 @@ import Data.Maybe (catMaybes)
 import Dijkstra
   ( Cell (..),
     Solution (cost),
-    World (lookupCell, movePossible),
+    World (lookupCell, adjacentCells),
     findSolutionFrom,
   )
 import Util (safeHead, safeMinimum, split, trim)
@@ -18,7 +18,7 @@ data HeightMapCell = Start | End | Height !Int
 
 newtype HeightMap = HeightMap (M.Map (Int, Int) HeightMapCell)
 
-instance World HeightMap where
+instance World HeightMap (Int, Int) where
   lookupCell (x, y) (HeightMap map) = M.lookup (x, y) map <&> toDijkstraCell
     where
       toDijkstraCell :: HeightMapCell -> Cell
@@ -26,10 +26,14 @@ instance World HeightMap where
       toDijkstraCell End = Destination 1
       toDijkstraCell (Height h) = Cell 1
 
-  movePossible from to (HeightMap world) = fromHeight + 1 >= toHeight
+  adjacentCells (x, y) (HeightMap world) = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      & filter (movePossible)
     where
-      fromHeight = from >>= flip M.lookup world & maybe 0 cellHeight
-      toHeight = M.lookup to world & maybe 0 cellHeight
+      movePossible to = case (M.lookup (x, y) world, M.lookup to world) of
+        (Just previous, Just this) -> cellHeight previous + 1 >= cellHeight this
+        (Nothing, Just this) -> True
+        _ -> False
+
 
 parseCell :: Char -> Either String HeightMapCell
 parseCell 'S' = Right Start

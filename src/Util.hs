@@ -175,3 +175,15 @@ mapWithPrevious f previous [] = []
 mapWithPrevious f previous (x : xs) = v : mapWithPrevious f v xs
   where
     v = f previous x
+
+class Unwrap f a where
+  unwrap :: f a -> a
+
+instance Unwrap Maybe a where
+  unwrap (Just a) = a
+  unwrap Nothing = error "tried to unwrap Nothing"
+
+
+instance Show e => Unwrap (Either e) a where
+  unwrap (Right a) = a
+  unwrap (Left e) = error $ "tried to unwrap a Left " <> show e

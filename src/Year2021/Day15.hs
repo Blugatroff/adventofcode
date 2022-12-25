@@ -8,7 +8,7 @@ import Data.Functor ((<&>))
 import Dijkstra
   ( Cell (..),
     Solution (cost),
-    World (lookupCell, movePossible),
+    World (lookupCell, adjacentCells),
     findSolutionFrom,
   )
 import Util (readInt, split, trim)
@@ -19,7 +19,7 @@ data Cave = Cave
     height :: !Int
   }
 
-instance World Cave where
+instance World Cave (Int, Int) where
   lookupCell (x, y) cave =
     if isInCave x y cave
       then
@@ -28,7 +28,7 @@ instance World Cave where
             getCell x y cave
       else Nothing
 
-  movePossible from to cave = True
+  adjacentCells (x, y) world = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
 
 instance Show Cave where
   show cave =
@@ -53,7 +53,7 @@ parse input = do
   Right $ Cave array width height
 
 solvePartOne :: Cave -> Maybe Int
-solvePartOne cave = findSolutionFrom cave (0, 0) <&> cost <&> subtract (getCell 0 0 cave)
+solvePartOne cave = findSolutionFrom cave (0 :: Int, 0 :: Int) <&> cost <&> subtract (getCell 0 0 cave)
 
 tileCave :: Cave -> Cave
 tileCave cave = Cave array (width cave * 5) (height cave * 5)
