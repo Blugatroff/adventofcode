@@ -14,6 +14,7 @@ dependencies:
 - transformers
 - loop
 - monad-loops
+- deepseq
 
 ghc-options:
 - -Wall
@@ -35,6 +36,9 @@ default-extensions:
   MultiParamTypeClasses
   FlexibleInstances
   ImportQualifiedPost
+  DeriveGeneric
+  ScopedTypeVariables
+  BangPatterns
 
 executables:
   aoc-exe:
@@ -42,3 +46,4 @@ executables:
     source-dirs:         src
     ghc-options:
     - -O2
+    - -threaded
