@@ -1,11 +1,12 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
+
 module Util where
 
 import Data.Either.Combinators (mapLeft)
 import Data.Function ((&))
 import Data.List (dropWhileEnd, foldl', isPrefixOf, maximumBy, minimumBy)
-import qualified Data.Map as M
-import qualified Debug.Trace as Trace
+import Data.Map qualified as M
+import Debug.Trace qualified as Trace
 import Text.Read (readEither)
 
 split :: Eq a => a -> [a] -> [[a]]
@@ -183,7 +184,11 @@ instance Unwrap Maybe a where
   unwrap (Just a) = a
   unwrap Nothing = error "tried to unwrap Nothing"
 
-
 instance Show e => Unwrap (Either e) a where
   unwrap (Right a) = a
   unwrap (Left e) = error $ "tried to unwrap a Left " <> show e
+
+newtype TransparentString = TransparentString String
+
+instance Show TransparentString where
+  show (TransparentString s) = s
