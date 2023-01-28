@@ -5,6 +5,8 @@ module Day
   )
 where
 
+import Data.Map qualified as M
+
 type Part = String -> Either String String
 
 data Day = Day
@@ -14,7 +16,7 @@ data Day = Day
 
 data Year = Year
   { name :: !Int,
-    days :: ![Day]
+    days :: !(M.Map Int Day)
   }
 
 instance Show Year where
