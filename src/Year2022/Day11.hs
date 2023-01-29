@@ -6,7 +6,7 @@ import Data.Foldable (forM_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (sort)
-import Util (modifyList, readInt, split, splitOnce, splitSeq, trim)
+import Util (modifyList, readInt, split, splitOnce, splitSeq, trace, trim)
 
 data OperationArgument = OldValue | Number !Int deriving (Show)
 
@@ -102,15 +102,23 @@ repeateState n state = do
 
 solvePartOne :: [Monkey] -> Int
 solvePartOne monkeys =
-  execState (repeateState 20 (playRound (`mod` 3))) monkeys
-    <&> inspectionCount & sort & reverse & take 2 & product
+  execState (repeateState 20 (playRound (`div` 3))) monkeys
+    <&> inspectionCount
+    & sort
+    & reverse
+    & take 2
+    & product
 
 solvePartTwo :: [Monkey] -> Int
 solvePartTwo monkeys =
   execState (repeateState 10000 (playRound (`mod` modBase))) monkeys
-    <&> inspectionCount & sort & reverse & take 2 & product
+    <&> inspectionCount
+    & sort
+    & reverse
+    & take 2
+    & product
   where
-    modBase = monkeys <&> test & product
+    modBase = monkeys <&> test & product & trace "modBase"
 
 partOne :: String -> Either String String
 partOne input = parse input <&> solvePartOne <&> show

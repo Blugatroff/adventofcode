@@ -7,21 +7,21 @@ module Dijkstra
   )
 where
 
-import Data.Functor ((<&>))
 import Data.Function ((&))
+import Data.Functor ((<&>))
+import Data.Heap qualified as Heap
 import Data.Maybe (catMaybes)
-import qualified Data.Heap as Heap
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 
 class World world pos where
   lookupCell :: pos -> world -> Maybe Cell
   adjacentCells :: pos -> world -> [pos]
 
 data Solution pos = Solution {path :: [pos], cost :: Int}
-  deriving(Show)
+  deriving (Show)
 
 data Cell = Destination !Int | Cell !Int
-  deriving(Show)
+  deriving (Show)
 
 cellCost :: Cell -> Int
 cellCost (Destination cost) = cost
@@ -44,20 +44,18 @@ instance Eq pos => Ord (Path pos) where
   compare (PathBranch _ _ cost1 _) (PathEnd _ _ cost2 _) = compare cost1 cost2
   compare (PathEnd _ _ cost1 _) (PathBranch _ _ cost2 _) = compare cost1 cost2
 
-findPaths :: World world pos => Maybe (Path pos) -> (pos, Int) -> world -> Maybe (Path pos)
-findPaths previous (pos, cost) world = 
-  lookupCell pos world <&> \cell -> let
-    thisCost = cellCost cell
-
-    next = adjacentCells pos world 
-      <&> (\p -> findPaths (Just this) (p, cost + thisCost) world) 
-      & catMaybes
-    
-    this = case cell of
-      Destination _ -> PathEnd previous pos cost thisCost
-      _ -> PathBranch previous pos cost next
-    in this
-    
+findPaths :: Show pos => World world pos => Maybe (Path pos) -> (pos, Int) -> world -> Maybe (Path pos)
+findPaths previous (pos, cost) world =
+  lookupCell pos world <&> \cell ->
+    let thisCost = cellCost cell
+        next =
+          adjacentCells pos world
+            <&> (\p -> findPaths (Just this) (p, cost + thisCost) world)
+            & catMaybes
+        this = case cell of
+          Destination _ -> PathEnd previous pos cost thisCost
+          _ -> PathBranch previous pos cost next
+     in this
 
 type PathQueue pos = Heap.Heap (Path pos)
 

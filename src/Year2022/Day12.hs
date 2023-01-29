@@ -3,12 +3,12 @@ module Year2022.Day12 (partOne, partTwo) where
 import Data.Char (isAsciiLower, isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import qualified Data.Map as M
+import Data.Map qualified as M
 import Data.Maybe (catMaybes)
 import Dijkstra
   ( Cell (..),
     Solution (cost),
-    World (lookupCell, adjacentCells),
+    World (adjacentCells, lookupCell),
     findSolutionFrom,
   )
 import Util (safeHead, safeMinimum, split, trim)
@@ -26,14 +26,14 @@ instance World HeightMap (Int, Int) where
       toDijkstraCell End = Destination 1
       toDijkstraCell (Height h) = Cell 1
 
-  adjacentCells (x, y) (HeightMap world) = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-      & filter (movePossible)
+  adjacentCells (x, y) (HeightMap world) =
+    [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      & filter movePossible
     where
       movePossible to = case (M.lookup (x, y) world, M.lookup to world) of
         (Just previous, Just this) -> cellHeight previous + 1 >= cellHeight this
         (Nothing, Just this) -> True
         _ -> False
-
 
 parseCell :: Char -> Either String HeightMapCell
 parseCell 'S' = Right Start
