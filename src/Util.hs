@@ -8,6 +8,7 @@ import Data.List (dropWhileEnd, foldl', isPrefixOf, maximumBy, minimumBy)
 import Data.Map qualified as M
 import Debug.Trace qualified as Trace
 import Text.Read (readEither)
+import Data.Maybe (mapMaybe)
 
 split :: Eq a => a -> [a] -> [[a]]
 split del [] = []
@@ -192,3 +193,13 @@ newtype TransparentString = TransparentString String
 
 instance Show TransparentString where
   show (TransparentString s) = s
+
+
+indexed :: [a] -> [(Int, a)]
+indexed = zip [0..]
+
+tuplePermutations :: [a] -> [(a, a)]
+tuplePermutations items =
+  indexed items >>= \(i, item1) ->
+    let f (j, item2) = if i /= j && j <= i then Just (item1, item2) else Nothing
+    in mapMaybe f $ indexed items

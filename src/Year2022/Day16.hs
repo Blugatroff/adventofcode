@@ -1,20 +1,15 @@
 module Year2022.Day16 (partOne, partTwo) where
 
-import Control.Concurrent (forkIO)
-import Control.Concurrent.Chan (Chan, newChan, readChan, writeChan)
-import Control.DeepSeq (NFData, deepseq)
-import Control.Exception (BlockedIndefinitelyOnMVar, try)
-import Control.Monad (forM_)
+import Control.Monad (when)
 import Data.Char (isDigit, isSpace, isUpper)
-import Data.Function (on, (&))
+import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.List (foldl')
+import Data.Map (Map)
 import Data.Map qualified as M
-import Data.Maybe (catMaybes, maybeToList)
+import Data.Maybe (fromMaybe, maybeToList, mapMaybe)
+import Data.Set (Set)
 import Data.Set qualified as S
-import GHC.Generics (Generic)
-import System.IO.Unsafe (unsafePerformIO)
-import Util (mapFst, mapSnd, minimumByKey, readInt, safeMaximum, split, trim)
+import Util (readInt, safeMaximum, split, trim, tuplePermutations)
 
 type RawValve = (String, Int, [String])
 
@@ -29,32 +24,15 @@ parseLine line = do
 parse :: String -> Either String [RawValve]
 parse input = split '\n' input <&> trim isSpace & filter (not . null) & traverse parseLine
 
-data Step = Open Valve | MoveTo Valve | NoOp
-  deriving (Eq, Ord, Generic)
+type Name = (Char, Char)
 
-instance NFData Step
-
-data Valve = Valve {name :: (Char, Char), rate :: Int, tunnels :: [Valve]}
-  deriving (Generic)
-
-instance NFData Valve
-
-instance Eq Valve where
-  a == b = name a == name b
-
-instance Ord Valve where
-  compare = compare `on` name
+data Valve = Valve {valveName :: Name, valveRate :: Int, valveTunnels :: [Valve]}
 
 tupleToList :: (a, a) -> [a]
 tupleToList (a, b) = [a, b]
 
 instance Show Valve where
-  show = tupleToList . name
-
-instance Show Step where
-  show (Open v) = "Open " <> tupleToList (name v)
-  show (MoveTo v) = "MoveTo " <> tupleToList (name v)
-  show NoOp = "NoOp"
+  show = tupleToList . valveName
 
 assembleValves :: [RawValve] -> [Valve]
 assembleValves rawValves = M.elems valveMap
@@ -69,127 +47,136 @@ assembleValves rawValves = M.elems valveMap
       t <- tunnels
       maybeToList $ M.lookup t valveMap
 
-shortestPathBetween :: Valve -> Valve -> Maybe [Valve]
-shortestPathBetween src dst = pathsBetween S.empty src dst & minimumByKey length
+type Path = [(Name, Name)]
+
+type Paths = Map Name (Map Name Path)
+
+type Network = Map Name Valve
+
+getValve :: Name -> Network -> Valve
+getValve name = fromMaybe (error "valve not found") . M.lookup name
+
+findPaths :: Network -> Paths
+findPaths network = findPathsFrom <$> network
   where
-    pathsBetween :: S.Set Valve -> Valve -> Valve -> [[Valve]]
-    pathsBetween visited src dst | name src == name dst = [[]]
-    pathsBetween visited src dst = indirect
+    findPathsFrom valve =
+      let current = M.fromList [(valveName valve, [])]
+       in go (current, current, M.empty)
+
+    go :: (Map Name Path, Map Name Path, Map Name Path) -> Map Name Path
+    go (current, connections, _) | M.null current = connections
+    go (current, connections, _) = go (newNext, newConnections, M.empty)
       where
-        indirect =
-          tunnels src
-            & filter notVisited
-            <&> (\tunnel -> pathsBetween (S.insert src visited) tunnel dst <&> (tunnel :))
-            & concat
+        (_, newConnections, newNext) = foldl fold (current, connections, M.empty) $ M.toList current
 
-        notVisited :: Valve -> Bool
-        notVisited valve = not $ S.member valve visited
+    fold :: (Map Name Path, Map Name Path, Map Name Path) -> (Name, Path) -> (Map Name Path, Map Name Path, Map Name Path)
+    fold (current, connections, next) (name, path) = foldl fold (current, connections, next) $ valveTunnels (getValve name network)
+      where
+        fold :: (Map Name Path, Map Name Path, Map Name Path) -> Valve -> (Map Name Path, Map Name Path, Map Name Path)
+        fold (current, connections, next) tunnel = case M.lookup (valveName tunnel) connections of
+          Nothing ->
+            let connPath = path <> [(name, valveName tunnel)]
+             in (current, M.insert (valveName tunnel) connPath connections, M.insert (valveName tunnel) connPath next)
+          Just _ -> (current, connections, next)
 
-shortestPaths :: [Valve] -> Paths
-shortestPaths valves = M.fromList $ do
-  src <- valves
-  dst <- valves
-  path <- maybeToList $ shortestPathBetween src dst
-  return ((src, dst), path)
+createNetwork :: [Valve] -> Map Name Valve
+createNetwork = M.fromList . map (\valve -> (valveName valve, valve))
 
-type Paths = M.Map (Valve, Valve) [Valve]
+data Move = Move {moveReward :: Int, moveTarget :: Name, movePath :: Path}
 
-readChannelUntilEmpty :: Chan a -> IO [a]
-readChannelUntilEmpty chan = do
-  result <- try $ readChan chan
-  case result of
-    Left (e :: BlockedIndefinitelyOnMVar) -> return []
-    Right v -> (v :) <$> readChannelUntilEmpty chan
+moveCost :: Move -> Int
+moveCost (Move {movePath}) = length movePath + 1
 
-parallelMaximum :: (NFData a, Ord a) => [[a]] -> Maybe a
-parallelMaximum chunks = unsafePerformIO $ do
-  chan <- newChan
-  forM_ chunks $ \chunk -> do
-    forkIO $ do
-      let max = safeMaximum chunk
-      max `deepseq` writeChan chan max
-  chunkMaximums <- readChannelUntilEmpty chan
-  return $ safeMaximum $ catMaybes chunkMaximums
+data State = State
+  { stateNetwork :: Network,
+    statePaths :: Paths,
+    statePosition :: Name,
+    stateMaxTurns :: Int,
+    stateTurn :: Int,
+    statePressure :: Int,
+    stateOpenValves :: Set Name
+  }
 
-solvePartOne :: [Valve] -> Maybe Int
-solvePartOne valves = do
-  startValve <- M.lookup ('A', 'A') valveMap
-  let plans = map (simulatePlan . make30Mins) <$> allPlans paths (S.fromList nonNullValves) 0 startValve
-  parallelMaximum plans
+turnsLeft :: State -> Int
+turnsLeft (State { stateMaxTurns, stateTurn }) = stateMaxTurns - stateTurn
+
+getPaths :: Name -> Paths -> Map Name Path
+getPaths src = fromMaybe M.empty . M.lookup src
+
+findNextMoves :: State -> [Move]
+findNextMoves state =
+  getPaths (statePosition state) (statePaths state)
+    & M.toList
+    & mapMaybe (\(name, path) -> do
+      when (S.member name (stateOpenValves state)) Nothing
+      let flow = valveRate (getValve name (stateNetwork state))
+      when (flow == 0) Nothing
+      let travelTurns = length path
+      let openTurns = 1
+      let turnsSpentOpen = turnsLeft state - travelTurns - openTurns
+      if turnsSpentOpen < 0 then Nothing
+      else pure (Move (flow * turnsSpentOpen) name path)
+    )
+
+applyMove :: Move -> State -> State
+applyMove move state = state
+  { statePosition = moveTarget move
+  , stateTurn = stateTurn state + moveCost move
+  , statePressure = statePressure state + moveReward move
+  , stateOpenValves = S.insert (moveTarget move) (stateOpenValves state)
+  }
+
+type ValvesOpen = Set Name
+type BestPressureAchieved = Int
+type Best = Map ValvesOpen BestPressureAchieved
+
+applyBestMoves :: (State -> Best -> Best) -> State -> Best -> (State, [Move], Best)
+applyBestMoves bestUpdater state best = spreadFrom [] state best $ findNextMoves state
   where
-    valveMap = M.fromList $ (\valve -> (name valve, valve)) <$> valves
-    paths = shortestPaths valves
-    nonNullValves = filter ((> 1) . rate) valves
-    make30Mins plan = plan ++ repeat NoOp & take 30
+    spreadFrom :: [Move] -> State -> Best -> [Move] -> (State, [Move], Best)
+    spreadFrom bestMoves bestState best = \case
+      [] -> (bestState, bestMoves, bestUpdater state best)
+      (move:moves) ->
+        let next = applyMove move state
+            (next', nextMoves, newBest) = applyBestMoves bestUpdater next best
+        in if statePressure next' > statePressure bestState then
+            spreadFrom nextMoves next' newBest moves
+          else
+            spreadFrom bestMoves bestState newBest moves
 
-    simulatePlan :: [Step] -> Int
-    simulatePlan steps = foldl' runStep (0, 0) steps & snd
-      where
-        runStep (r, sum) NoOp = (r, sum + r)
-        runStep (r, sum) (MoveTo valve) = (r, sum + r)
-        runStep (r, sum) (Open valve) = (r + rate valve, sum + r)
 
-    allPlans :: Paths -> S.Set Valve -> Int -> Valve -> [[[Step]]]
-    allPlans paths openValves minute current | minute > 30 = [[[]]]
-    allPlans paths openValves minute current | S.null openValves = [[[]]]
-    allPlans paths openValves minute current = S.elems openValves <&> next
-      where
-        next valve = (steps ++) <$> concat (allPlans paths (S.delete valve openValves) (minute + length steps) valve)
-          where
-            steps = maybe [] (map MoveTo) (M.lookup (current, valve) paths) ++ [Open valve]
+startingState :: Network -> Paths -> Int -> State
+startingState network paths maxTurns = State network paths ('A', 'A') maxTurns 0 0 S.empty
 
-solvePartTwo :: [Valve] -> Maybe Int
-solvePartTwo valves = do
-  startValve <- M.lookup ('A', 'A') valveMap
-  let plans = map (simulatePlanWithElefant . makeMins 26 (NoOp, NoOp)) <$> allPlansWithElefant paths (S.fromList nonNullValves) 0 ([], []) (startValve, startValve)
-  parallelMaximum plans
+solvePartOne :: Network -> Paths -> Int
+solvePartOne network paths = statePressure $ (\(a, b, c) -> a) $ applyBestMoves (const id) (startingState network paths 30) M.empty
+
+solvePartTwo :: Network -> Paths -> Int
+solvePartTwo network paths = fromMaybe (-1) bestPressure
   where
-    valveMap = M.fromList $ (\valve -> (name valve, valve)) <$> valves
-    paths = shortestPaths valves
-    nonNullValves = filter ((> 1) . rate) valves
-    makeMins time def plan = plan ++ repeat def & take time
+    bestUpdater state = M.alter (\case
+      Nothing -> Just (statePressure state)
+      Just p | p < statePressure state -> Just (statePressure state)
+      Just p -> Just p
+      ) (stateOpenValves state)
 
-    simulatePlanWithElefant :: [(Step, Step)] -> Int
-    simulatePlanWithElefant steps = snd $ foldl' runStep (0, 0) steps
-      where
-        runStep (r, sum) (a, b) = executeStep a $ executeStep b $ timeFlow (r, sum)
+    (_, _, best) = applyBestMoves bestUpdater (startingState network paths 26) M.empty
 
-        timeFlow (r, sum) = (r, sum + r)
+    bestPressure = M.toList best
+      & tuplePermutations
+      & filter (\((human, _), (elephant, _)) -> S.null $ S.intersection human elephant)
+      & map (\((_, human), (_, elephant)) -> human + elephant)
+      & safeMaximum
 
-        executeStep NoOp (r, sum) = (r, sum)
-        executeStep (MoveTo valve) (r, sum) = (r, sum)
-        executeStep (Open valve) (r, sum) = (r + rate valve, sum)
-
-    allPlansWithElefant :: Paths -> S.Set Valve -> Int -> ([Step], [Step]) -> (Valve, Valve) -> [[[(Step, Step)]]]
-    allPlansWithElefant paths openValves minute queued current | minute > 26 = [[[]]]
-    allPlansWithElefant paths openValves minute queued current@(currentElf, currentElefant) = case queued of
-      ([], []) | S.null openValves -> [[[]]]
-      (elfStep : queuedElfSteps, elefantStep : queuedElefantSteps) ->
-        (openValves, current)
-          & applyStep mapFst elfStep
-          & applyStep mapSnd elefantStep
-          & \(openValves, current) ->
-            map ((elfStep, elefantStep) :) <$> allPlansWithElefant paths openValves (minute + 1) (queuedElfSteps, queuedElefantSteps) current
-      ([], queuedElefantSteps) -> generateNewSteps (,queuedElefantSteps) fst queuedElefantSteps
-      (queuedElfSteps, []) -> generateNewSteps (queuedElfSteps,) snd queuedElfSteps
-      where
-        applyStep which NoOp (openValves, current) = (openValves, current)
-        applyStep which (MoveTo valve) (openValves, current) = (openValves, which (const valve) current)
-        applyStep which (Open valve) (openValves, current) = (S.delete valve openValves, current)
-
-        nextQueue current valve = maybe [] (map MoveTo) (M.lookup (current, valve) paths) ++ [Open valve]
-
-        notAlreadyOpenedByPartner partnerSteps valve = Open valve `notElem` partnerSteps
-
-        generateNewSteps build which partnerSteps =
-          if null nonReservedOpenValves
-            then allPlansWithElefant paths openValves minute (build [NoOp]) current
-            else nonReservedOpenValves <&> (\valve -> concat $ allPlansWithElefant paths openValves minute (build (nextQueue (which current) valve)) current)
-          where
-            nonReservedOpenValves = S.elems openValves & filter (notAlreadyOpenedByPartner partnerSteps)
+part :: (Network -> Paths -> Int) -> String -> Either String String
+part solve input = do
+  valves <- assembleValves <$> parse input
+  let network = createNetwork valves
+  let paths = findPaths network
+  pure $ show $ solve network paths
 
 partOne :: String -> Either String String
-partOne input = parse input <&> assembleValves <&> solvePartOne <&> show
+partOne = part solvePartOne
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> assembleValves <&> solvePartTwo <&> show
+partTwo = part solvePartTwo
