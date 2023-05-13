@@ -41,6 +41,8 @@ default-extensions:
   ScopedTypeVariables
   BangPatterns
   NamedFieldPuns
+  OverloadedRecordDot
+  DuplicateRecordFields
 
 executables:
   aoc-exe:
