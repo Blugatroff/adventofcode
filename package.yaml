@@ -16,6 +16,12 @@ dependencies:
 - monad-loops
 - deepseq
 - parallel
+- http-types
+- http-client
+- req
+- text
+- dotenv
+- directory
 
 ghc-options:
 - -Wall
@@ -43,6 +49,7 @@ default-extensions:
   NamedFieldPuns
   OverloadedRecordDot
   DuplicateRecordFields
+  OverloadedStrings
 
 executables:
   aoc-exe:

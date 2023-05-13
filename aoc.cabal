@@ -64,18 +64,24 @@ executable aoc-exe
   hs-source-dirs:
       src
   default-extensions:
-      TupleSections LambdaCase FlexibleContexts MultiParamTypeClasses FlexibleInstances ImportQualifiedPost DeriveGeneric ScopedTypeVariables BangPatterns NamedFieldPuns OverloadedRecordDot DuplicateRecordFields
+      TupleSections LambdaCase FlexibleContexts MultiParamTypeClasses FlexibleInstances ImportQualifiedPost DeriveGeneric ScopedTypeVariables BangPatterns NamedFieldPuns OverloadedRecordDot DuplicateRecordFields OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wno-name-shadowing -Wno-unused-matches -O2 -threaded -eventlog
   build-depends:
       array
     , base >=4.7 && <5
     , containers
     , deepseq
+    , directory
+    , dotenv
     , either
     , heaps
+    , http-client
+    , http-types
     , loop
     , monad-loops
     , mtl
     , parallel
+    , req
+    , text
     , transformers
   default-language: Haskell2010
