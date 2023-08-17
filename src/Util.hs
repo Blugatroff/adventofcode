@@ -150,11 +150,14 @@ sign n | n > 0 = 1
 sign n | n < 0 = -1
 sign n = 0
 
-readWithErrorMessage :: (String -> String) -> String -> Either String Int
+readWithErrorMessage :: Read a => (String -> String) -> String -> Either String a
 readWithErrorMessage error input = readEither input & mapLeft (const $ error input)
 
 readInt :: String -> Either String Int
-readInt = readWithErrorMessage $ \input -> "expected an integer but got: \"" <> input <> "\""
+readInt = readWithErrorMessage $ \input -> "expected an int but got: \"" <> input <> "\""
+
+readInteger :: String -> Either String Integer
+readInteger = readWithErrorMessage $ \input -> "expected an integer but got: \"" <> input <> "\""
 
 trace :: Show a => String -> a -> a
 trace label value = Trace.trace (label <> ": " <> show value) value
