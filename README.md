@@ -10,14 +10,10 @@ Because of that i always try to stick to the immutable solutions before falling 
 
 ## How to Run
 
-### Using Cabal
 ```sh
-cabal run aoc -- 2022 17 two
-```
+nix develop
 
-### Using Stack
-```sh
-stack run -- 2022 17 two
+cabal run aoc -- 2022 17 two
 ```
 
 ## Architecture
