@@ -9,6 +9,7 @@ import Data.Map qualified as M
 import Debug.Trace qualified as Trace
 import Text.Read (readEither)
 import Data.Maybe (mapMaybe)
+import Data.Char (isSpace)
 
 split :: Eq a => a -> [a] -> [[a]]
 split del [] = []
@@ -36,6 +37,9 @@ replace pat with rest =
 
 trim :: (a -> Bool) -> [a] -> [a]
 trim f = dropWhileEnd f . dropWhile f
+
+trimSpace :: String -> String
+trimSpace = trim isSpace
 
 findSeq :: Eq a => [a] -> [a] -> Maybe Int
 findSeq [] list = Just 0
