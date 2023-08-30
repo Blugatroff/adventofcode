@@ -51,6 +51,7 @@ executable aoc-exe
       Year2022.Day2
       Year2022.Day20
       Year2022.Day21
+      Year2022.Day22
       Year2022.Day3
       Year2022.Day4
       Year2022.Day5
@@ -62,7 +63,19 @@ executable aoc-exe
   hs-source-dirs:
       src
   default-extensions:
-      TupleSections LambdaCase FlexibleContexts MultiParamTypeClasses FlexibleInstances ImportQualifiedPost DeriveGeneric ScopedTypeVariables BangPatterns NamedFieldPuns OverloadedRecordDot DuplicateRecordFields OverloadedStrings
+      TupleSections 
+      LambdaCase 
+      FlexibleContexts 
+      MultiParamTypeClasses 
+      FlexibleInstances 
+      ImportQualifiedPost 
+      DeriveGeneric 
+      ScopedTypeVariables 
+      BangPatterns 
+      NamedFieldPuns 
+      OverloadedRecordDot 
+      DuplicateRecordFields 
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wno-name-shadowing -Wno-unused-matches -O2 -threaded -eventlog
   build-depends:
       array

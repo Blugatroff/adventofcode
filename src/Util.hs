@@ -8,7 +8,7 @@ import Data.List (dropWhileEnd, foldl', isPrefixOf, maximumBy, minimumBy)
 import Data.Map qualified as M
 import Debug.Trace qualified as Trace
 import Text.Read (readEither)
-import Data.Maybe (mapMaybe)
+import Data.Maybe (mapMaybe, fromMaybe)
 import Data.Char (isSpace)
 
 split :: Eq a => a -> [a] -> [[a]]
@@ -133,6 +133,12 @@ safeMinimum list = Just $ minimum list
 safeMaximum :: Ord a => [a] -> Maybe a
 safeMaximum [] = Nothing
 safeMaximum list = Just $ maximum list
+
+minimumOrZero :: Ord a => Num a => [a] -> a
+minimumOrZero = fromMaybe 0 . safeMinimum
+
+maximumOrZero :: Ord a => Num a => [a] -> a
+maximumOrZero = fromMaybe 0 . safeMaximum
 
 maybeToRight :: e -> Maybe a -> Either e a
 maybeToRight error Nothing = Left error
