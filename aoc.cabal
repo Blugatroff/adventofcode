@@ -67,20 +67,23 @@ executable aoc-exe
   hs-source-dirs:
       src
   default-extensions:
-      TupleSections 
-      LambdaCase 
-      FlexibleContexts 
-      MultiParamTypeClasses 
-      FlexibleInstances 
-      ImportQualifiedPost 
-      DeriveGeneric 
-      ScopedTypeVariables 
-      BangPatterns 
-      NamedFieldPuns 
-      OverloadedRecordDot 
-      DuplicateRecordFields 
+      LambdaCase
+      OverloadedRecordDot
+      DuplicateRecordFields
       OverloadedStrings
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -Wno-name-shadowing -Wno-unused-matches -O2 -threaded -eventlog
+  ghc-options: 
+      -Wall
+      -Wcompat
+      -Widentities
+      -Wincomplete-record-updates
+      -Wincomplete-uni-patterns
+      -Wmissing-export-lists
+      -Wmissing-home-modules
+      -Wpartial-fields
+      -Wredundant-constraints
+      -Wno-name-shadowing
+      -Wno-unused-matches
+      -O2
   build-depends:
       array
     , base >=4.7 && <5
@@ -101,4 +104,4 @@ executable aoc-exe
     , transformers
     , vector
     , extra
-  default-language: Haskell2010
+  default-language: GHC2021
