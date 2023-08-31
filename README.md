@@ -6,7 +6,7 @@ Because of that i always try to stick to the immutable solutions before falling 
 
 ## Progress
 - 2021: **`1..18`**
-- 2022: **`1..19`**
+- 2022: **`1..23`**
 
 ## How to Run
 
