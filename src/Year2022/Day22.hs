@@ -12,6 +12,7 @@ import Data.Map qualified as M
 import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import Data.Traversable (for)
 import Util (applyN, maximumByKey, maximumOrZero, minimumByKey, minimumOrZero, readInt, safeLast, safeMaximum, safeMinimum, splitSeq, trim)
+import Direction
 
 data Instruction = TurnLeft | TurnRight | Move Int
   deriving (Show)
@@ -61,36 +62,6 @@ parseInstruction :: String -> Either String Instruction
 parseInstruction "L" = Right TurnLeft
 parseInstruction "R" = Right TurnRight
 parseInstruction n = fmap Move $ first (\_ -> "failed to parse instruction: '" <> n <> "'") $ readInt n
-
-data Direction = DirDown | DirUp | DirLeft | DirRight deriving (Eq, Ord, Show)
-
-directionAxis :: Direction -> (a, a) -> a
-directionAxis DirDown = snd
-directionAxis DirUp = snd
-directionAxis DirRight = fst
-directionAxis DirLeft = fst
-
-turnLeft :: Direction -> Direction
-turnLeft DirUp = DirLeft
-turnLeft DirLeft = DirDown
-turnLeft DirDown = DirRight
-turnLeft DirRight = DirUp
-
-turnRight :: Direction -> Direction
-turnRight DirUp = DirRight
-turnRight DirRight = DirDown
-turnRight DirDown = DirLeft
-turnRight DirLeft = DirUp
-
-directionX :: Direction -> Int
-directionX DirRight = 1
-directionX DirLeft = -1
-directionX _ = 0
-
-directionY :: Direction -> Int
-directionY DirDown = 1
-directionY DirUp = -1
-directionY _ = 0
 
 data Cursor = Cursor {direction :: Direction, pos :: (Int, Int)}
 

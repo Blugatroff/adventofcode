@@ -44,7 +44,7 @@ instance Eq pos => Ord (Path pos) where
   compare (PathBranch _ _ cost1 _) (PathEnd _ _ cost2 _) = compare cost1 cost2
   compare (PathEnd _ _ cost1 _) (PathBranch _ _ cost2 _) = compare cost1 cost2
 
-findPaths :: Show pos => World world pos => Maybe (Path pos) -> (pos, Int) -> world -> Maybe (Path pos)
+findPaths :: World world pos => Maybe (Path pos) -> (pos, Int) -> world -> Maybe (Path pos)
 findPaths previous (pos, cost) world =
   lookupCell pos world <&> \cell ->
     let thisCost = cellCost cell
@@ -61,7 +61,7 @@ type PathQueue pos = Heap.Heap (Path pos)
 
 type Visited pos = Set.Set pos
 
-evaluateNextBranch :: (Show pos, Ord pos) => PathQueue pos -> Visited pos -> Maybe (Solution pos)
+evaluateNextBranch :: Ord pos => PathQueue pos -> Visited pos -> Maybe (Solution pos)
 evaluateNextBranch queue visited = case Heap.viewMin queue of
   Nothing -> Nothing
   Just (PathEnd p pos cost cellCost, _) -> Just $ Solution (reverse $ pos : maybe [] buildPath p) (cost + cellCost)
@@ -74,7 +74,7 @@ buildPath :: Path pos -> [pos]
 buildPath (PathEnd previous pos _ _) = pos : maybe [] buildPath previous
 buildPath (PathBranch previous pos _ _) = pos : maybe [] buildPath previous
 
-findSolutionFrom :: (Show pos, Ord pos, World world pos) => world -> pos -> Maybe (Solution pos)
+findSolutionFrom :: (Ord pos, World world pos) => world -> pos -> Maybe (Solution pos)
 findSolutionFrom world pos = do
   root <- findPaths Nothing (pos, 0) world
   evaluateNextBranch (Heap.singleton root) Set.empty
