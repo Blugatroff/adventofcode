@@ -1,16 +1,16 @@
-module Data.Pos (Pos(..), x, y) where
+module Data.Pos (Pos(..)) where
 
-data Pos = Pos {y :: Int, x :: Int}
+data Pos = Pos {x :: Int, y :: Int}
   deriving (Show, Eq)
 
 instance Ord Pos where
-  compare (Pos y1 x1) (Pos y2 x2) = compare (y1, x1) (y2, x2)
+  compare (Pos x1 y1) (Pos x2 y2) = compare (y1, x1) (y2, x2)
 
 instance Num Pos where
-  (Pos y1 x1) + (Pos y2 x2) = Pos (y1 + y2) (x1 + x2)
-  (Pos y1 x1) * (Pos y2 x2) = Pos (y1 * y2) (x1 * x2)
-  abs (Pos y x) = Pos (abs y) (abs x)
-  negate (Pos y x) = Pos (-y) (-x)
-  signum (Pos y x) = Pos (signum y) (signum x)
-  fromInteger i = Pos (fromInteger i) (fromInteger i)
+  (Pos x1 y1) + (Pos x2 y2) = Pos (x1 + x2) (y1 + y2)
+  (Pos x1 y1) * (Pos x2 y2) = Pos (x1 * x2) (y1 * y2)
+  abs (Pos x y) = Pos (abs x) (abs y)
+  negate (Pos x y) = Pos (-x) (-y)
+  signum (Pos x y) = Pos (signum x) (signum y)
+  fromInteger i = Pos (fromInteger i) 0
 

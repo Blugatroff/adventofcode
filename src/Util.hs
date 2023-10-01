@@ -10,6 +10,7 @@ import Debug.Trace qualified as Trace
 import Text.Read (readEither)
 import Data.Maybe (mapMaybe, fromMaybe)
 import Data.Char (isSpace)
+import Data.Traversable (for)
 
 split :: Eq a => a -> [a] -> [[a]]
 split del [] = []
@@ -223,4 +224,7 @@ tuplePermutations items =
 
 findMap :: (a -> Maybe b) -> [a] -> Maybe b
 findMap f = safeHead . mapMaybe f
+
+forWithIndex :: Applicative m => [a] -> (Int -> a -> m b) -> m [b]
+forWithIndex xs f = for (zip [0..] xs) (uncurry f)
 

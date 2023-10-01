@@ -31,19 +31,19 @@ jetIndex :: Jets -> Int
 jetIndex (Jets i _) = i
 
 verticalLineShape :: Shape
-verticalLineShape = Shape "VerticalLine" $ S.fromList [Pos y 0 | y <- [0 .. 3]]
+verticalLineShape = Shape "VerticalLine" $ S.fromList [Pos 0 y | y <- [0 .. 3]]
 
 horizontalLineShape :: Shape
-horizontalLineShape = Shape "HorizontalLine" $ S.fromList [Pos 0 x | x <- [0 .. 3]]
+horizontalLineShape = Shape "HorizontalLine" $ S.fromList [Pos x 0 | x <- [0 .. 3]]
 
 crossShape :: Shape
-crossShape = Shape "Cross" $ S.fromList $ [Pos y 1 | y <- [0 .. 2]] <> [Pos 1 x | x <- [0 .. 2]]
+crossShape = Shape "Cross" $ S.fromList $ [Pos 1 y | y <- [0 .. 2]] <> [Pos x 1 | x <- [0 .. 2]]
 
 lShape :: Shape
-lShape = Shape "L" $ S.fromList $ [Pos y 2 | y <- [0 .. 2]] <> [Pos 0 x | x <- [0 .. 2]]
+lShape = Shape "L" $ S.fromList $ [Pos 2 y | y <- [0 .. 2]] <> [Pos x 0 | x <- [0 .. 2]]
 
 squareShape :: Shape
-squareShape = Shape "Square" $ S.fromList [Pos 0 0, Pos 1 0, Pos 0 1, Pos 1 1]
+squareShape = Shape "Square" $ S.fromList [Pos 0 0, Pos 0 1, Pos 1 0, Pos 1 1]
 
 shapes :: [Shape]
 shapes = cycle [horizontalLineShape, crossShape, lShape, verticalLineShape, squareShape]
