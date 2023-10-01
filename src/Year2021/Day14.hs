@@ -6,7 +6,7 @@ import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (find, foldl', sort)
-import qualified Data.Map as M
+import Data.Map qualified as M
 import Data.Maybe (fromMaybe, mapMaybe)
 import Util
   ( applyN,
@@ -82,9 +82,7 @@ applyRule (left, right, between) pairs = case M.lookup key pairs of
   Nothing -> return ()
   Just 0 -> return ()
   Just count -> do
-    modify $ mapFst $ M.alter (Just . (+ (- count)) . fromMaybe 0) key
-    modify $ mapFst $ M.alter (Just . (+ count) . fromMaybe 0) leftSide
-    modify $ mapFst $ M.alter (Just . (+ count) . fromMaybe 0) rightSide
+    modify $ mapFst $ M.alter (Just . (+ count) . fromMaybe 0) rightSide . M.alter (Just . (+ (-count)) . fromMaybe 0) key . M.alter (Just . (+ count) . fromMaybe 0) leftSide
     modify $ mapSnd $ M.alter (Just . (+ count) . fromMaybe 0) between
   where
     key = (left, right)

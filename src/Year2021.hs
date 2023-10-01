@@ -12,6 +12,7 @@ import Year2021.Day15 qualified as Day15
 import Year2021.Day16 qualified as Day16
 import Year2021.Day17 qualified as Day17
 import Year2021.Day18 qualified as Day18
+import Year2021.Day19 qualified as Day19
 import Year2021.Day2 qualified as Day2
 import Year2021.Day3 qualified as Day3
 import Year2021.Day4 qualified as Day4
@@ -41,7 +42,8 @@ days =
       (15, Day Day15.partOne Day15.partTwo),
       (16, Day Day16.partOne Day16.partTwo),
       (17, Day Day17.partOne Day17.partTwo),
-      (18, Day Day18.partOne Day18.partTwo)
+      (18, Day Day18.partOne Day18.partTwo),
+      (19, Day Day19.partOne Day19.partTwo)
     ]
 
 year :: Year

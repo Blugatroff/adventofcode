@@ -10,18 +10,17 @@ import Data.Map qualified as M
 import Data.Text qualified as Text
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Day (Day (partOne, partTwo), Part, Year (days, name))
-import Network.HTTP.Client qualified as HTTPClient
-import Network.HTTP.Req ((/:))
-import Network.HTTP.Req qualified as HTTPReq
-import Network.HTTP.Types.Status (Status (..))
+import Network.HTTP.Simple qualified as HTTPSimple
+import Network.HTTP.Types qualified as HTTPTypes
+import System.Directory (createDirectoryIfMissing)
 import System.Environment (getArgs, lookupEnv)
 import System.Exit (exitFailure)
 import System.IO (hPrint, hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
-import System.Directory (createDirectoryIfMissing)
-import Util (Unwrap (unwrap), readInt)
+import Util (Unwrap (unwrap), readInt, trim)
 import Year2021 qualified
 import Year2022 qualified
+import Data.Char (isSpace)
 
 data PartName = PartOne | PartTwo
   deriving (Show)
@@ -103,29 +102,21 @@ loadInput year day = do
     Nothing -> do
       hPutStrLn stderr (cookie <> " environment variable missing")
       exitFailure
-  let yearText = Text.pack $ show year
-  let dayText = Text.pack $ show day
-  res <- try $ HTTPReq.runReq HTTPReq.defaultHttpConfig $ do
-    let sessionCookie = HTTPReq.header (encodeUtf8 "Cookie") (encodeUtf8 ("session=" <> Text.pack session))
-    let url = HTTPReq.http "adventofcode.com" /: yearText /: "day" /: dayText /: "input"
-    HTTPReq.responseBody <$> HTTPReq.req HTTPReq.GET url HTTPReq.NoReqBody HTTPReq.bsResponse sessionCookie
-  body <- case res of
-    Right body -> return body
-    Left (error :: HTTPReq.HttpException) -> do
-      error <- case error of
-        HTTPReq.VanillaHttpException (HTTPClient.HttpExceptionRequest _ error) -> return error
-        e -> do hPrint stderr e; exitFailure
-      (Status code message) <- case error of
-        HTTPClient.StatusCodeException response _ -> return $ HTTPClient.responseStatus response
-        e -> do hPrint stderr e; exitFailure
-      case code of
-        400 -> do
-          hPutStrLn stderr $ "Server responded with 400 " <> show message <> ", is your session cookie still valid?"
-          exitFailure
-        code -> do
-          hPrint stderr message
-          exitFailure
-  return $ Text.unpack $ decodeUtf8 body
+  let url = "https://adventofcode.com/" <> show year <> "/day/" <> show day <> "/input"
+  req <- HTTPSimple.parseRequest url
+  let reqWithHeader = HTTPSimple.setRequestHeader HTTPTypes.hCookie [encodeUtf8 ("session=" <> Text.pack session)] req
+  response <- catch (HTTPSimple.httpBS reqWithHeader) $ \(exception :: HTTPSimple.HttpException) -> do
+    hPrint stderr exception
+    exitFailure
+  let body = Text.unpack $ decodeUtf8 $ HTTPSimple.getResponseBody response
+  case HTTPSimple.getResponseStatusCode response of
+    200 -> pure body
+    400 -> do
+      hPutStrLn stderr $ "Server responded with 400 is your session cookie still valid? (" <> trim isSpace body <> ")"
+      exitFailure
+    code -> do
+      hPutStrLn stderr body
+      exitFailure
 
 start :: Args -> IO ()
 start Help = do

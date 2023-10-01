@@ -85,6 +85,10 @@ safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (a : _) = Just a
 
+safeTail :: [a] -> Maybe [a]
+safeTail [] = Nothing
+safeTail xs = Just $ tail xs
+
 safeLast :: [a] -> Maybe a
 safeLast [] = Nothing
 safeLast [a] = Just a
@@ -216,3 +220,7 @@ tuplePermutations items =
   indexed items >>= \(i, item1) ->
     let f (j, item2) = if i /= j && j <= i then Just (item1, item2) else Nothing
     in mapMaybe f $ indexed items
+
+findMap :: (a -> Maybe b) -> [a] -> Maybe b
+findMap f = safeHead . mapMaybe f
+
