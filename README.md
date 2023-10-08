@@ -5,7 +5,7 @@ I'm using this to learn Haskell and purely functional programming in general.
 Because of that i always try to stick to the immutable solutions before falling back to using the [**ST**](https://hackage.haskell.org/package/base-4.17.0.0/docs/Control-Monad-ST.html) or [**IO**](https://hackage.haskell.org/package/base-4.17.0.0/docs/System-IO.html#g:1) Monad.
 
 ## Progress
-- 2021: **`1..21`**
+- 2021: **`1..22`**
 - 2022: **`1..25`**
 
 ## How to Run

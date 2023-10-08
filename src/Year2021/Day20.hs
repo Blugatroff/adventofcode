@@ -3,15 +3,13 @@ module Year2021.Day20 (partOne, partTwo) where
 import Data.Bits (shiftL, (.|.))
 import Data.Char (isSpace)
 import Data.Either.Extra (maybeToEither)
-import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List.Extra ((!?))
 import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import Data.Pos (Pos (..))
 import Data.Set (Set)
 import Data.Set qualified as Set
-import Debug.Trace (traceShow)
-import Util (applyN, forWithIndex, maximumOrZero, minimumOrZero, safeHead, safeTail, trace, trim)
+import Util (applyN, forWithIndex, maximumOrZero, minimumOrZero, safeHead, safeTail, trim)
 
 data Input = Input {enhancement :: [Bool], image :: Set Pos}
 

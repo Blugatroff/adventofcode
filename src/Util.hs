@@ -212,7 +212,6 @@ newtype TransparentString = TransparentString String
 instance Show TransparentString where
   show (TransparentString s) = s
 
-
 indexed :: [a] -> [(Int, a)]
 indexed = zip [0..]
 

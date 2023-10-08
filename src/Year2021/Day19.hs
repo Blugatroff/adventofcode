@@ -10,7 +10,7 @@ import Data.Pos3
 import Data.Traversable (for)
 import Util (applyN, dedup, findMap, readInt, safeHead, safeMaximum, safeTail, split, splitSeq, trim, tuplePermutations)
 
-data Scanner = Scanner {id :: Int, beacons :: [Pos3]}
+data Scanner = Scanner {id :: Int, beacons :: [Pos3 Int]}
 
 parseScanner :: String -> Either String Scanner
 parseScanner str = do
@@ -24,7 +24,7 @@ parseScanner str = do
   beacons <- traverse parsePos tail
   Right $ Scanner {id, beacons}
 
-parsePos :: String -> Either String Pos3
+parsePos :: String -> Either String (Pos3 Int)
 parsePos str = do
   splits <- traverse readInt $ split ',' $ trim isSpace str
   case splits of
@@ -34,13 +34,13 @@ parsePos str = do
 parse :: String -> Either String [Scanner]
 parse = traverse parseScanner . splitSeq "\n\n"
 
-type Orientation = Pos3 -> Pos3
+type Orientation = Pos3 Int -> Pos3 Int
 
-rotateAroundX :: Pos3 -> Pos3
+rotateAroundX :: Pos3 Int -> Pos3 Int
 rotateAroundX (Pos3 x y z) = Pos3 x (-z) y
-rotateAroundY :: Pos3 -> Pos3
+rotateAroundY :: Pos3 Int -> Pos3 Int
 rotateAroundY (Pos3 x y z) = Pos3 (-z) y x
-rotateAroundZ :: Pos3 -> Pos3
+rotateAroundZ :: Pos3 Int -> Pos3 Int
 rotateAroundZ (Pos3 x y z) = Pos3 (-y) x z
 
 allOrientations :: [Orientation]
@@ -54,7 +54,7 @@ allOrientations =
       [0 .. 3] <&> \n -> applyN n rotateAroundX . applyN 3 rotateAroundY
     ]
 
-findOverlapAtSameOrientation :: [Pos3] -> [Pos3] -> Maybe Pos3
+findOverlapAtSameOrientation :: [Pos3 Int] -> [Pos3 Int] -> Maybe (Pos3 Int)
 findOverlapAtSameOrientation beaconsA beaconsB =
   flip findMap beaconsB $ \beaconB -> findMap (findMatches beaconB) beaconsA
   where
@@ -64,7 +64,7 @@ findOverlapAtSameOrientation beaconsA beaconsB =
       let nMatches = length $ filter (pred . (+) offset) beaconsB
       if nMatches == 12 then Just offset else Nothing
 
-findOverlap :: [Pos3] -> [Pos3] -> Maybe ([Pos3], Pos3)
+findOverlap :: [Pos3 Int] -> [Pos3 Int] -> Maybe ([Pos3 Int], Pos3 Int)
 findOverlap beaconsA beaconsB = do
   flip findMap allOrientations $ \orientation -> do
     let reorientedBeaconsB = map orientation beaconsB
@@ -73,9 +73,9 @@ findOverlap beaconsA beaconsB = do
 
 data Network = Network {scanner :: Scanner, overlaps :: [Overlap]}
 
-data Overlap = Overlap {offset :: Pos3, network :: Network}
+data Overlap = Overlap {offset :: Pos3 Int, network :: Network}
 
-scannersInNetwork :: Network -> [(Pos3, Scanner)]
+scannersInNetwork :: Network -> [(Pos3 Int, Scanner)]
 scannersInNetwork = go 0
   where
     go pos (Network {scanner, overlaps}) =
@@ -99,19 +99,19 @@ buildNetwork start = do
             pure $ Just $ Overlap {offset, network = nextNetwork}
   pure $ Network {scanner = start, overlaps}
 
-solve :: [Scanner] -> Either String [(Pos3, Scanner)]
+solve :: [Scanner] -> Either String [(Pos3 Int, Scanner)]
 solve scanners = do
   first <- maybeToEither "need at least one scanner" $ safeHead scanners
   let network = State.evalState (buildNetwork first) scanners
   pure $ scannersInNetwork network
 
-solvePartOne :: [(Pos3, Scanner)] -> Int
+solvePartOne :: [(Pos3 Int, Scanner)] -> Int
 solvePartOne scanners = do
   let beacons = scanners >>= \(pos, scanner) -> map (+ pos) scanner.beacons
   let uniqueBeacons = dedup beacons
   length uniqueBeacons
 
-solvePartTwo :: [(Pos3, Scanner)] -> Either String Int
+solvePartTwo :: [(Pos3 Int, Scanner)] -> Either String Int
 solvePartTwo scanners = do
   let distances = map (uncurry manhattan) $ tuplePermutations $ map fst scanners
   maybeToEither "need at least one sensor" $ safeMaximum distances

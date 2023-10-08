@@ -20,6 +20,8 @@ executable aoc-exe
       Direction
       Data.Pos
       Data.Pos3
+      Data.Range
+      Data.Cuboid
       Year2021
       Year2021.Day1
       Year2021.Day10
@@ -35,6 +37,7 @@ executable aoc-exe
       Year2021.Day2
       Year2021.Day20
       Year2021.Day21
+      Year2021.Day22
       Year2021.Day3
       Year2021.Day4
       Year2021.Day5
