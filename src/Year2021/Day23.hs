@@ -1,12 +1,8 @@
 module Year2021.Day23 (partOne, partTwo) where
 
 import Control.Monad ((<=<))
-import Data.Array (Array)
-import Data.Array qualified as Array
-import Data.Array.IArray ((!), (//))
 import Data.Char (isAlpha)
 import Data.Either.Extra (maybeToEither)
-import Data.Foldable (fold)
 import Data.Function (on)
 import Data.Heap qualified as Heap
 import Data.List (sortBy, transpose)
@@ -14,6 +10,7 @@ import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Traversable (for)
 import Util (safeHead)
+import Data.Foldable (fold)
 
 data Amphipod = A | B | C | D deriving (Eq, Ord)
 
@@ -55,13 +52,13 @@ instance Show Tile where
   show Unoccupied = "."
   show (Occupied amphi) = show amphi
 
-data Burrow = Burrow {rooms :: Rooms, hallway :: Array Int Tile} deriving (Eq, Ord)
+data Burrow = Burrow {rooms :: Rooms, hallway :: Map Int Tile} deriving (Eq, Ord)
 
 instance Show Burrow where
   show (Burrow {rooms, hallway}) =
     fold
       [ "#############\n#",
-        concatMap (show . snd) $ sortBy (compare `on` fst) $ Array.assocs hallway,
+        concatMap (show . snd) $ sortBy (compare `on` fst) $ Map.assocs hallway,
         "#\n###" <> show rooms.a.inner <> "#" <> show rooms.b.inner <> "#" <> show rooms.c.inner <> "#" <> show rooms.d.inner,
         "###\n  #" <> show rooms.a.outer <> "#" <> show rooms.b.outer <> "#" <> show rooms.c.outer <> "#" <> show rooms.d.outer,
         "#  \n  #########  "
@@ -106,22 +103,24 @@ roomIndex = \case
 possibleStepsInLocation :: Burrow -> Location -> [Step]
 possibleStepsInLocation burrow location = do
   case location of
-    InHallway p -> case burrow.hallway ! p of
-      Occupied amphi -> case pathToRoomFree p amphi of
+    InHallway p -> case Map.lookup p burrow.hallway of
+      Just (Occupied amphi) -> case pathToRoomFree p amphi of
         Nothing -> []
         Just slot -> [MoveIntoRoom location amphi slot]
-      Unoccupied -> []
+      Just Unoccupied -> []
+      Nothing -> []
     InRoom room slot -> case pickRoomSlot burrow room slot of
       Occupied amphi -> do
         let p = roomIndex room
             directlyMoveToRoomStep =
               if room == amphi
                 then []
-                else case burrow.hallway ! p of
-                  Unoccupied -> case pathToRoomFree p amphi of
+                else case Map.lookup p burrow.hallway of
+                  Nothing -> []
+                  Just Unoccupied -> case pathToRoomFree p amphi of
                     Nothing -> []
                     Just slot -> [MoveIntoRoom location amphi slot]
-                  Occupied _ -> []
+                  Just (Occupied _) -> []
         case slot of
           Outer | room == amphi && (Occupied amphi == pickRoomSlot burrow room Inner) -> [] -- This Amphipod is already in their Room, no reason to leave
           Outer -> case pickRoomSlot burrow room Inner of
@@ -133,12 +132,14 @@ possibleStepsInLocation burrow location = do
       Unoccupied -> []
   where
     pathToRoomFree p room = case compare p (roomIndex room) of
-      LT -> case burrow.hallway ! (p + 1) of
-        Occupied _ -> Nothing
-        Unoccupied -> pathToRoomFree (p + 1) room
-      GT -> case burrow.hallway ! (p - 1) of
-        Occupied _ -> Nothing
-        Unoccupied -> pathToRoomFree (p - 1) room
+      LT -> case Map.lookup (p + 1) burrow.hallway of
+        Nothing -> Nothing
+        Just (Occupied _) -> Nothing
+        Just Unoccupied -> pathToRoomFree (p + 1) room
+      GT -> case Map.lookup (p - 1) burrow.hallway of
+        Nothing -> Nothing
+        Just (Occupied _) -> Nothing
+        Just Unoccupied -> pathToRoomFree (p - 1) room
       EQ -> case pickRoomSlot burrow room Inner of
         Occupied _ -> Nothing
         Unoccupied -> case pickRoomSlot burrow room Outer of
@@ -146,18 +147,19 @@ possibleStepsInLocation burrow location = do
           Unoccupied -> Just Outer
 
 possibleHallwayStepsFrom :: Burrow -> Int -> [Int]
-possibleHallwayStepsFrom burrow p = case burrow.hallway ! p of
-  Occupied _ -> []
-  Unoccupied -> p : goLeft (p - 1) ++ goRight (p + 1)
+possibleHallwayStepsFrom burrow p = case Map.lookup p burrow.hallway of
+  Nothing -> []
+  Just (Occupied _) -> []
+  Just Unoccupied -> p : goLeft (p - 1) ++ goRight (p + 1)
   where
-    goLeft 0 = []
-    goLeft p = case burrow.hallway ! p of
-      Occupied _ -> []
-      Unoccupied -> p : goLeft (p - 1)
-    goRight 11 = []
-    goRight p = case burrow.hallway ! p of
-      Occupied _ -> []
-      Unoccupied -> p : goRight (p + 1)
+    goLeft p = case Map.lookup p burrow.hallway of
+      Nothing -> []
+      Just (Occupied _) -> []
+      Just Unoccupied -> p : goLeft (p - 1)
+    goRight p = case Map.lookup p burrow.hallway of
+      Nothing -> []
+      Just (Occupied _) -> []
+      Just Unoccupied -> p : goRight (p + 1)
 
 allLocations :: [Location]
 allLocations =
@@ -178,19 +180,19 @@ pickRoomSlot burrow C Outer = burrow.rooms.c.outer
 pickRoomSlot burrow D Outer = burrow.rooms.d.outer
 
 makeBurrow :: Rooms -> Burrow
-makeBurrow = flip Burrow $ Array.array (1, 11) $ (,Unoccupied) <$> [1 .. 11]
+makeBurrow = flip Burrow $ Map.fromList $ (,Unoccupied) <$> [1 .. 11]
 
 applyStep :: Step -> Burrow -> Burrow
 applyStep (MoveIntoHallway location amphi p) burrow = case location of
-  InRoom A Outer -> burrow {rooms = burrow.rooms {a = burrow.rooms.a {outer = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom B Outer -> burrow {rooms = burrow.rooms {b = burrow.rooms.b {outer = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom C Outer -> burrow {rooms = burrow.rooms {c = burrow.rooms.c {outer = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom D Outer -> burrow {rooms = burrow.rooms {d = burrow.rooms.d {outer = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom A Inner -> burrow {rooms = burrow.rooms {a = burrow.rooms.a {inner = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom B Inner -> burrow {rooms = burrow.rooms {b = burrow.rooms.b {inner = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom C Inner -> burrow {rooms = burrow.rooms {c = burrow.rooms.c {inner = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InRoom D Inner -> burrow {rooms = burrow.rooms {d = burrow.rooms.d {inner = Unoccupied}}, hallway = burrow.hallway // [(p, Occupied amphi)]}
-  InHallway srcP -> burrow {hallway = burrow.hallway // [(p, Occupied amphi), (srcP, Unoccupied)]}
+  InRoom A Outer -> burrow {rooms = burrow.rooms {a = burrow.rooms.a {outer = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom B Outer -> burrow {rooms = burrow.rooms {b = burrow.rooms.b {outer = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom C Outer -> burrow {rooms = burrow.rooms {c = burrow.rooms.c {outer = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom D Outer -> burrow {rooms = burrow.rooms {d = burrow.rooms.d {outer = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom A Inner -> burrow {rooms = burrow.rooms {a = burrow.rooms.a {inner = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom B Inner -> burrow {rooms = burrow.rooms {b = burrow.rooms.b {inner = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom C Inner -> burrow {rooms = burrow.rooms {c = burrow.rooms.c {inner = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InRoom D Inner -> burrow {rooms = burrow.rooms {d = burrow.rooms.d {inner = Unoccupied}}, hallway = Map.insert p (Occupied amphi) burrow.hallway}
+  InHallway srcP -> burrow {hallway = Map.insert p (Occupied amphi) $ Map.insert srcP Unoccupied burrow.hallway}
 applyStep (MoveIntoRoom location room slot) burrow = fillRoom room $ case location of
   InRoom A Outer -> burrow {rooms = burrow.rooms {a = burrow.rooms.a {outer = Unoccupied}}}
   InRoom B Outer -> burrow {rooms = burrow.rooms {b = burrow.rooms.b {outer = Unoccupied}}}
@@ -200,7 +202,7 @@ applyStep (MoveIntoRoom location room slot) burrow = fillRoom room $ case locati
   InRoom B Inner -> burrow {rooms = burrow.rooms {b = burrow.rooms.b {inner = Unoccupied}}}
   InRoom C Inner -> burrow {rooms = burrow.rooms {c = burrow.rooms.c {inner = Unoccupied}}}
   InRoom D Inner -> burrow {rooms = burrow.rooms {d = burrow.rooms.d {inner = Unoccupied}}}
-  InHallway p -> burrow {hallway = burrow.hallway // [(p, Unoccupied)]}
+  InHallway p -> burrow {hallway = Map.insert p Unoccupied burrow.hallway}
   where
     fillRoom room burrow = case room of
       A -> if slot == Outer then burrow {rooms = burrow.rooms {a = burrow.rooms.a {outer = Occupied A}}} else burrow {rooms = burrow.rooms {a = burrow.rooms.a {inner = Occupied A}}}
@@ -214,18 +216,6 @@ amphipodsAreOrganized burrow =
     && burrow.rooms.b == Room (Occupied B) (Occupied B)
     && burrow.rooms.c == Room (Occupied C) (Occupied C)
     && burrow.rooms.d == Room (Occupied D) (Occupied D)
-
-burrowOrderScore :: Burrow -> Int -- low = good
-burrowOrderScore burrow = roomOrderScore A burrow.rooms.a + roomOrderScore B burrow.rooms.b + roomOrderScore C burrow.rooms.c + roomOrderScore D burrow.rooms.d
-  where
-    roomOrderScore :: Amphipod -> Room -> Int
-    roomOrderScore amphi room = tileOrderScore amphi room.inner + tileOrderScore amphi room.outer
-
-    tileOrderScore :: Amphipod -> Tile -> Int
-    tileOrderScore room tile = case tile of
-      Occupied amphi | amphi /= room -> 2
-      Unoccupied -> 1
-      Occupied _ -> 0
 
 data OrdFst a b = OrdFst a b
 
