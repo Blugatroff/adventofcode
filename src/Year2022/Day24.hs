@@ -27,8 +27,7 @@ data Valley = Valley
 parse :: String -> Either String Valley
 parse input = do
   lines <- for (zip [0 ..] $ filter (not . null) $ map (trim isSpace) $ split '\n' input) $ \(y, line) ->
-    catMaybes <$> do
-      for (zip [0 ..] line) $ \(x, c) ->
+    fmap catMaybes $ for (zip [0 ..] line) $ \(x, c) ->
         fmap ((x, y),) <$> do
           case c of
             '#' -> Right Nothing

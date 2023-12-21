@@ -11,7 +11,7 @@ source-repository head
   type: git
   location: https://github.com/Blugatroff/adventofcode
 
-executable aoc-exe
+executable aoc
   main-is: Main.hs
   other-modules:
       Day
