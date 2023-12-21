@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -10,9 +10,9 @@
         pkgs = import nixpkgs { inherit system; };
         extraLibDirs = (nixpkgs.lib.foldr (p: s: "${p} ${s}") "" 
           (map (p: "--extra-lib-dirs=${p}/lib") [
-            (pkgs.pkgsMusl.gmp6.override { withStatic = true; })
-            (pkgs.pkgsMusl.libffi.overrideAttrs (old: { dontDisableStatic = true; }))
-            pkgs.pkgsMusl.zlib.static
+            pkgs.pkgsStatic.gmp6
+            pkgs.pkgsStatic.libffi
+            pkgs.pkgsStatic.zlib
           ])
         );
       in
@@ -21,9 +21,9 @@
           default = pkgs.mkShell {
             name = "static-haskell-shell";
             nativeBuildInputs = [
-              (pkgs.pkgsMusl.gmp.override { withStatic = true; })
-              (pkgs.pkgsMusl.libffi.overrideAttrs (_old: { dontDisableStatic = true; }))
-              (pkgs.pkgsMusl.haskellPackages.ghcWithPackages (pkgs: [ pkgs.cabal-install pkgs.haskell-language-server ]))
+              (pkgs.pkgsMusl.buildPackages.haskellPackages.ghcWithPackages (pkgs: [ pkgs.cabal-install ]))
+              pkgs.cabal-install
+              pkgs.haskell-language-server
               pkgs.upx
             ];
             shellHook = ''
