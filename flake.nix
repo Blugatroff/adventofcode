@@ -24,10 +24,11 @@
             name = "aoc-haskell-dev-shell";
             nativeBuildInputs = [
               (pkgs.buildPackages.haskellPackages.ghcWithPackages (pkgs: [ pkgs.cabal-install pkgs.haskell-language-server ]))
+              (pkgs.writeShellScriptBin "run" ''
+                set -xeu
+                cabal run aoc -- "''${@:1}"
+              '')
             ];
-            shellHook = ''run() {
-              cabal run aoc -- "''${@:1}"
-            }'';
           };
           static = let
             extraLibDirs = (nixpkgs.lib.foldr (p: s: "${p} ${s}") "" 
@@ -42,15 +43,14 @@
             nativeBuildInputs = [
               (pkgs.pkgsMusl.buildPackages.haskellPackages.ghcWithPackages (pkgs: [ pkgs.cabal-install ]))
               pkgs.upx
-            ];
-            shellHook = ''
-              build() {
+              (pkgs.writeShellScriptBin "build" ''
+                set -xeu
                 cabal build --ghc-option=-optl=-static --ghc-option=-O2 --ghc-option=-w ${extraLibDirs}
                 cp $(cabal list-bin aoc) ./aoc
                 strip aoc
                 upx aoc
-              }
-            '';
+              '')
+            ];
           };
         };
       }

@@ -17,7 +17,6 @@ import System.Environment (getArgs, lookupEnv)
 import System.Exit (exitFailure)
 import System.IO (hPrint, hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
-import Control.Concurrent (forkIO, newEmptyMVar, putMVar, readMVar)
 
 import Util (Unwrap (unwrap), readInt, trim)
 import Year2021 qualified
