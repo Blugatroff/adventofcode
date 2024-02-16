@@ -2,10 +2,10 @@ module Main (main) where
 
 import Configuration.Dotenv qualified as Dotenv
 import Control.Exception
-import Control.Monad (forM_, void)
-import Data.Function
+import Control.Monad (forM_, void, forM)
+import Data.Char (isSpace)
 import Data.Functor ((<&>))
-import Data.List (find, sortBy)
+import Data.List (find, sort)
 import Data.Map qualified as M
 import Data.Text qualified as Text
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
@@ -17,15 +17,17 @@ import System.Environment (getArgs, lookupEnv)
 import System.Exit (exitFailure)
 import System.IO (hPrint, hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
+import Control.Concurrent (forkIO, newEmptyMVar, putMVar, readMVar)
+
 import Util (Unwrap (unwrap), readInt, trim)
 import Year2021 qualified
 import Year2022 qualified
-import Data.Char (isSpace)
+import Control.Parallel.Strategies
 
 data PartName = PartOne | PartTwo
   deriving (Show)
 
-newtype DayIndex = DayIndex Int
+newtype DayIndex = DayIndex Int deriving (NFData)
 
 instance Show DayIndex where
   show (DayIndex i) = show i
@@ -123,11 +125,21 @@ start Help = do
   putStrLn "Advent Of Code in Haskell"
   putStrLn ""
   putStrLn "Usage: ./aoc [--stdin] <year> <day> <part>"
-start (SpecificDay year day part source) = runDay source year day part
+start (SpecificDay year day part source) = runDayAndPrintResult source year day part
 start (AllFromYear year part) = do
-  forM_ (sortBy (compare `on` fst) $ M.assocs $ days year) $ \(index, day) -> do
-    putStrLn $ "Day " <> show index <> ":"
-    runDay File year (DayIndex index) part
+  let daysInOrder = map DayIndex $ sort $ M.keys $ days year
+  runDaysInParallel year part daysInOrder
+
+runDaysInParallel :: Year -> PartName -> [DayIndex] -> IO ()
+runDaysInParallel year part days = do
+  results <- forM days $ \day -> do
+    result <- runDay File year day part
+    pure (day, result)
+  forM_ (results `using` parList rdeepseq) $ \(day, result) -> do
+    putStrLn $ "Day " <> show day <> ":"
+    case result of
+      Left e -> putStrLn $ "Error: " <> e
+      Right result -> putStrLn $ "Result: \n" <> result
 
 loadFromSource :: Year -> DayIndex -> InputSource -> IO String
 loadFromSource year day Stdin = getContents
@@ -146,12 +158,16 @@ loadFromSource year day File = do
       putStrLn $ "Failed to read the file: \"" <> path <> "\"!"
       exitFailure
 
-runDay :: InputSource -> Year -> DayIndex -> PartName -> IO ()
+runDay :: InputSource -> Year -> DayIndex -> PartName -> IO (Either String String)
 runDay source year day@(DayIndex dayIndex) part = do
   input <- loadFromSource year day source
   let day = unwrap $ M.lookup dayIndex $ days year
   let solveFn = chooseSolveFunction part day
-  case solveFn input of
+  pure $ solveFn input
+
+runDayAndPrintResult :: InputSource -> Year -> DayIndex -> PartName -> IO ()
+runDayAndPrintResult source year day part =
+  runDay source year day part >>= \case
     Left e -> abort $ "Error: " <> e
     Right result -> putStrLn $ "Result: \n" <> result
 

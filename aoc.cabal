@@ -93,6 +93,8 @@ executable aoc
       -Wredundant-constraints
       -Wno-name-shadowing
       -Wno-unused-matches
+      -threaded
+      -with-rtsopts=-N6
   build-depends:
       array
     , base >=4.7 && <5
@@ -113,5 +115,4 @@ executable aoc
     , transformers
     , vector
     , extra
-    , bits
   default-language: GHC2021
