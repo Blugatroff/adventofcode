@@ -1,17 +1,19 @@
 module Year2021.Day15 (partOne, partTwo) where
 
 import Data.Array ((!))
-import qualified Data.Array as A
+import Data.Array qualified as A
 import Data.Char (isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Dijkstra
   ( Cell (..),
     Solution (cost),
-    World (lookupCell, adjacentCells),
+    World (adjacentCells, lookupCell, Pos),
     findSolutionFrom,
   )
 import Util (readInt, split, trim)
+import Data.List (intercalate)
+import Data.Pos qualified as P
 
 data Cave = Cave
   { cells :: !(A.Array Int Int),
@@ -19,8 +21,9 @@ data Cave = Cave
     height :: !Int
   }
 
-instance World Cave (Int, Int) where
-  lookupCell (x, y) cave =
+instance World Cave where
+  type Pos Cave = P.Pos
+  lookupCell (P.Pos x y) cave =
     if isInCave x y cave
       then
         Just $
@@ -28,13 +31,13 @@ instance World Cave (Int, Int) where
             getCell x y cave
       else Nothing
 
-  adjacentCells (x, y) world = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+  adjacentCells (P.Pos x y) world = [P.Pos (x - 1) y, P.Pos (x + 1) y, P.Pos x (y - 1), P.Pos x (y + 1)]
 
 instance Show Cave where
-  show cave =
-    concatMap (<> "\n") $
-      [0 .. height cave - 1] <&> \y ->
-        [0 .. width cave - 1] >>= \x -> getCell x y cave & show
+  show cave = intercalate "\n" $ do
+    [0 .. height cave - 1] <&> \y ->
+      [0 .. width cave - 1] >>= \x ->
+        getCell x y cave & show
 
 isInCave :: Int -> Int -> Cave -> Bool
 isInCave x y cave = x >= 0 && y >= 0 && x < width cave && y < height cave
@@ -53,7 +56,7 @@ parse input = do
   Right $ Cave array width height
 
 solvePartOne :: Cave -> Maybe Int
-solvePartOne cave = findSolutionFrom cave (0 :: Int, 0 :: Int) <&> cost <&> subtract (getCell 0 0 cave)
+solvePartOne cave = subtract (getCell 0 0 cave) . cost <$> findSolutionFrom cave (P.Pos 0 0)
 
 tileCave :: Cave -> Cave
 tileCave cave = Cave array (width cave * 5) (height cave * 5)
@@ -71,7 +74,7 @@ solvePartTwo :: Cave -> Maybe Int
 solvePartTwo = solvePartOne . tileCave
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input

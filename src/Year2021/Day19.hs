@@ -117,7 +117,7 @@ solvePartTwo scanners = do
   maybeToEither "need at least one sensor" $ safeMaximum distances
 
 partOne :: String -> Either String String
-partOne input = parse input >>= solve <&> solvePartOne <&> show
+partOne input = parse input >>= solve <&> show . solvePartOne
 
 partTwo :: String -> Either String String
-partTwo input = parse input >>= solve <&> solvePartTwo <&> show
+partTwo input = parse input >>= solve <&> show . solvePartTwo

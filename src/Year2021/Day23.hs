@@ -5,7 +5,7 @@ import Data.Char (isAlpha)
 import Data.Either.Extra (maybeToEither)
 import Data.Function (on)
 import Data.Heap qualified as Heap
-import Data.List (sortBy, transpose)
+import Data.List (sortBy, transpose, foldl')
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Traversable (for)
@@ -237,8 +237,8 @@ findSolutions burrow = go (Heap.singleton (OrdFst 0 ([], burrow))) Map.empty
           Just previousCost | previousCost <= cost -> go remaining visited
           _ -> do
             let visited' = Map.insert burrow cost visited
-            let fold step = Heap.insert $ OrdFst (cost + stepCost step) (step : steps, applyStep step burrow)
-            go (foldr fold remaining (possibleSteps burrow)) visited'
+            let folding heap step = Heap.insert (OrdFst (cost + stepCost step) (step : steps, applyStep step burrow)) heap
+            go (foldl' folding remaining (possibleSteps burrow)) visited'
 
 solvePartOne :: Burrow -> Either String String
 solvePartOne burrow = do

@@ -8,6 +8,7 @@ import Data.Maybe (catMaybes, fromMaybe)
 import Text.Read (readEither)
 import Util (safeMaximum, maximumByKey, maybeToRight, sign, splitOnce, splitSeqOnce, trim)
 import Prelude hiding (maximum)
+import Data.Pos (Pos(..))
 
 data Target = Target {minX :: !Int, maxX :: !Int, minY :: !Int, maxY :: !Int}
   deriving (Show)
@@ -22,7 +23,7 @@ parseRange range = case splitSeqOnce ".." (drop 1 $ dropWhile (/= '=') range) of
 
 parse :: String -> Either String Target
 parse input = do
-  ranges <- splitOnce ':' input <&> snd <&> trim isSpace & maybeToRight ("failed to parse line: " <> input)
+  ranges <- splitOnce ':' input <&> trim isSpace . snd & maybeToRight ("failed to parse line: " <> input)
   (xrange, yrange) <- maybeToRight ("failed to parse line: " <> input) $ splitOnce ',' ranges
   (minX, maxX) <- parseRange xrange
   (minY, maxY) <- parseRange yrange
@@ -34,38 +35,36 @@ parse input = do
         maxY = maxY
       }
 
-type Point = (Int, Int)
-
-type Velocity = (Int, Int)
+type Velocity = Pos
 
 drag :: Int -> Int
 drag n = n - sign n
 
-step :: (Point, Velocity) -> (Point, Velocity)
-step ((x, y), (vx, vy)) = ((x + vx, y + vy), (drag vx, vy - 1))
+step :: (Pos, Velocity) -> (Pos, Velocity)
+step (Pos x y, Pos vx vy) = (Pos (x + vx) (y + vy), Pos (drag vx) (vy - 1))
 
-isInTarget :: Target -> (Int, Int) -> Bool
-isInTarget target (x, y) = x >= minX target && x <= maxX target && y >= minY target && y <= maxY target
+isInTarget :: Target -> Pos -> Bool
+isInTarget target (Pos x y) = x >= minX target && x <= maxX target && y >= minY target && y <= maxY target
 
-targetReachable :: Target -> (Point, Velocity) -> Bool
-targetReachable target ((x, y), (vx, vy)) = not $ vy < 0 && y < minY target
+targetReachable :: Target -> (Pos, Velocity) -> Bool
+targetReachable target (Pos x y, Pos vx vy) = not $ vy < 0 && y < minY target
 
-type Shot = [(Point, Velocity)]
+type Shot = [(Pos, Velocity)]
 
-shoot :: Target -> (Point, Velocity) -> Maybe Shot
+shoot :: Target -> (Pos, Velocity) -> Maybe Shot
 shoot target (point, velocity)
   | not $ targetReachable target (point, velocity) = Nothing
   | isInTarget target point = Just [(point, velocity)]
   | otherwise = step (point, velocity) & shoot target <&> ((point, velocity) :)
 
 shotScore :: Shot -> Int
-shotScore steps = steps <&> fst <&> snd & safeMaximum & fromMaybe 0
+shotScore steps = steps <&> y . fst & safeMaximum & fromMaybe 0
 
 findBestShot :: [Shot] -> Maybe (Int, Shot)
 findBestShot shots = shots <&> (\shot -> (shotScore shot, shot)) & maximumByKey fst
 
 scanRange :: Target -> [Shot]
-scanRange target = catMaybes $ xrange >>= \vx -> [minY target .. 2000] <&> \vy -> shoot target ((0, 0), (vx, vy))
+scanRange target = catMaybes $ xrange >>= \vx -> [minY target .. 2000] <&> \vy -> shoot target (Pos 0 0, Pos vx vy)
   where
     xrange
       | minX target > 0 = [0 .. maxX target]
@@ -79,7 +78,8 @@ solvePartTwo :: Target -> Int
 solvePartTwo = length <$> scanRange
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input
+

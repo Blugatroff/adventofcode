@@ -81,6 +81,7 @@ executable aoc
       DuplicateRecordFields
       OverloadedStrings
       StrictData
+      TypeFamilies
   ghc-options: 
       -Wall
       -Wcompat

@@ -4,33 +4,30 @@ import Data.Char (isAsciiLower, isSpace)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Map qualified as M
-import Data.Maybe (catMaybes)
-import Dijkstra
-  ( Cell (..),
-    Solution (cost),
-    World (adjacentCells, lookupCell),
-    findSolutionFrom,
-  )
+import Data.Maybe (mapMaybe)
+import Data.Pos (Pos (..))
+import Dijkstra qualified
 import Util (safeHead, safeMinimum, split, trim)
 
 data HeightMapCell = Start | End | Height !Int
   deriving (Eq, Show)
 
-newtype HeightMap = HeightMap (M.Map (Int, Int) HeightMapCell)
+newtype HeightMap = HeightMap (M.Map Pos HeightMapCell)
 
-instance World HeightMap (Int, Int) where
-  lookupCell (x, y) (HeightMap map) = M.lookup (x, y) map <&> toDijkstraCell
+instance Dijkstra.World HeightMap where
+  type Pos HeightMap = Pos
+  lookupCell (Pos x y) (HeightMap map) = M.lookup (Pos x y) map <&> toDijkstraCell
     where
-      toDijkstraCell :: HeightMapCell -> Cell
-      toDijkstraCell Start = Cell 1
-      toDijkstraCell End = Destination 1
-      toDijkstraCell (Height h) = Cell 1
+      toDijkstraCell :: HeightMapCell -> Dijkstra.Cell
+      toDijkstraCell Start = Dijkstra.Cell 1
+      toDijkstraCell End = Dijkstra.Destination 1
+      toDijkstraCell (Height h) = Dijkstra.Cell 1
 
-  adjacentCells (x, y) (HeightMap world) =
-    [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+  adjacentCells (Pos x y) (HeightMap world) =
+    [Pos (x - 1) y, Pos (x + 1) y, Pos x (y - 1), Pos x (y + 1)]
       & filter movePossible
     where
-      movePossible to = case (M.lookup (x, y) world, M.lookup to world) of
+      movePossible to = case (M.lookup (Pos x y) world, M.lookup to world) of
         (Just previous, Just this) -> cellHeight previous + 1 >= cellHeight this
         (Nothing, Just this) -> True
         _ -> False
@@ -45,13 +42,13 @@ parseLine :: String -> Either String [HeightMapCell]
 parseLine = traverse parseCell
 
 parse :: String -> Either String HeightMap
-parse input = lines <&> assocs <&> M.fromList <&> HeightMap
+parse input = HeightMap . M.fromList . assocs <$> lines
   where
-    assocs :: [[HeightMapCell]] -> [((Int, Int), HeightMapCell)]
-    assocs lines = zip [0 ..] lines >>= \(y, l) -> zip [0 ..] l <&> \(x, c) -> ((x, y), c)
-    lines = split '\n' input <&> trim isSpace & traverse parseLine
+    assocs :: [[HeightMapCell]] -> [(Pos, HeightMapCell)]
+    assocs lines = zip [0 ..] lines >>= \(y, l) -> zip [0 ..] l <&> \(x, c) -> (Pos x y, c)
+    lines = traverse (parseLine . trim isSpace) (split '\n' input)
 
-findHeightMapStart :: HeightMap -> Maybe (Int, Int)
+findHeightMapStart :: HeightMap -> Maybe Pos
 findHeightMapStart (HeightMap map) = M.assocs map & filter ((== Start) . snd) & safeHead <&> fst
 
 maximumHeight :: Int
@@ -64,18 +61,18 @@ cellHeight Start = 0
 
 solvePartOne :: HeightMap -> Maybe Int
 solvePartOne heightMap = do
-  (x, y) <- findHeightMapStart heightMap
-  solution <- findSolutionFrom heightMap (x, y)
-  return $ cost solution - 1
+  Pos {x, y} <- findHeightMapStart heightMap
+  solution <- Dijkstra.findSolutionFrom heightMap (Pos x y)
+  return $ Dijkstra.cost solution - 1
 
 solvePartTwo :: HeightMap -> Maybe Int
-solvePartTwo heightMap@(HeightMap hm) = safeMinimum (cost <$> solutions) <&> subtract 1
+solvePartTwo heightMap@(HeightMap hm) = safeMinimum (Dijkstra.cost <$> solutions) <&> subtract 1
   where
-    solutions = startingPositions <&> findSolutionFrom heightMap & catMaybes
+    solutions = mapMaybe (Dijkstra.findSolutionFrom heightMap) startingPositions
     startingPositions = M.assocs hm & filter ((== 0) . cellHeight . snd) <&> fst
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input

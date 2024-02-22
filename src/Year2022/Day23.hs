@@ -8,8 +8,9 @@ import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import Data.Set qualified as S
 import Data.Traversable (for)
 import Util (applyN, dedup, safeMaximum, safeMinimum, splitSeq, trim)
+import Data.Pos (Pos(..))
 
-type Board = S.Set (Int, Int)
+type Board = S.Set Pos
 
 parse :: String -> Either String Board
 parse input =
@@ -17,7 +18,7 @@ parse input =
     for (zip [0 ..] $ filter (not . null) $ map (trim isSpace) $ splitSeq "\n" input) $ \(y, line) -> do
       for (zip [0 ..] line) $ \(x, n) -> case n of
         '.' -> Right Nothing
-        '#' -> Right $ Just (x, y)
+        '#' -> Right $ Just $ Pos x y
         c -> Left $ "unknown tile: '" <> show c <> "'"
 
 rotateArray :: [a] -> [a]
@@ -30,8 +31,6 @@ rotateArrayN n a = applyN n rotateArray a
 
 countMatching :: forall f a. Foldable f => (a -> Bool) -> f a -> Int
 countMatching condition = foldl (\n a -> if condition a then n + 1 else n) 0
-
-type Pos = (Int, Int)
 
 type Modification = (Pos, Pos)
 
@@ -57,15 +56,15 @@ runRound roundNumber board = foldl applyInsertion (foldl applyRemoval board free
         firstJust id $ rotateArrayN roundNumber props
 
     proposals :: Board -> Pos -> Maybe [Maybe Modification]
-    proposals board elve@(x, y) = do
-      let northWest = (x - 1, y - 1)
-      let north = (x, y - 1)
-      let northEast = (x + 1, y - 1)
-      let west = (x - 1, y)
-      let east = (x + 1, y)
-      let southWest = (x - 1, y + 1)
-      let south = (x, y + 1)
-      let southEast = (x + 1, y + 1)
+    proposals board elve@(Pos x y) = do
+      let northWest = Pos (x - 1) (y - 1)
+      let north = Pos x (y - 1)
+      let northEast = Pos (x + 1) (y - 1)
+      let west = Pos (x - 1) y
+      let east = Pos (x + 1) y
+      let southWest = Pos (x - 1) (y + 1)
+      let south = Pos x (y + 1)
+      let southEast = Pos (x + 1) (y + 1)
       let lookupOrEmpty = flip S.member board
       let nw = lookupOrEmpty northWest
       let no = lookupOrEmpty north
@@ -95,11 +94,11 @@ countEmpty :: Board -> Int
 countEmpty board = countMatching not $ do
   y <- [minY .. maxY]
   x <- [minX .. maxX]
-  pure $ S.member (x, y) board
+  pure $ S.member (Pos x y) board
   where
     positions = S.toList board
-    xs = map fst positions
-    ys = map snd positions
+    xs = map x positions
+    ys = map y positions
     minX = fromMaybe 0 $ safeMinimum xs
     minY = fromMaybe 0 $ safeMinimum ys
     maxX = fromMaybe 0 $ safeMaximum xs

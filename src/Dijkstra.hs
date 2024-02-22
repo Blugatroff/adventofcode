@@ -7,15 +7,17 @@ module Dijkstra
   )
 where
 
-import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Heap qualified as Heap
-import Data.Maybe (catMaybes)
+import Data.Kind (Type)
+import Data.Maybe (mapMaybe)
 import Data.Set qualified as Set
+import Data.List (foldl')
 
-class World world pos where
-  lookupCell :: pos -> world -> Maybe Cell
-  adjacentCells :: pos -> world -> [pos]
+class (Ord (Pos world)) => World world where
+  type Pos world :: Type
+  lookupCell :: Pos world -> world -> Maybe Cell
+  adjacentCells :: Pos world -> world -> [Pos world]
 
 data Solution pos = Solution {path :: [pos], cost :: Int}
   deriving (Show)
@@ -44,14 +46,12 @@ instance Eq pos => Ord (Path pos) where
   compare (PathBranch _ _ cost1 _) (PathEnd _ _ cost2 _) = compare cost1 cost2
   compare (PathEnd _ _ cost1 _) (PathBranch _ _ cost2 _) = compare cost1 cost2
 
-findPaths :: World world pos => Maybe (Path pos) -> (pos, Int) -> world -> Maybe (Path pos)
+findPaths :: World world => Maybe (Path (Pos world)) -> (Pos world, Int) -> world -> Maybe (Path (Pos world))
 findPaths previous (pos, cost) world =
   lookupCell pos world <&> \cell ->
     let thisCost = cellCost cell
         next =
-          adjacentCells pos world
-            <&> (\p -> findPaths (Just this) (p, cost + thisCost) world)
-            & catMaybes
+          mapMaybe (\p -> findPaths (Just this) (p, cost + thisCost) world) (adjacentCells pos world)
         this = case cell of
           Destination _ -> PathEnd previous pos cost thisCost
           _ -> PathBranch previous pos cost next
@@ -68,13 +68,13 @@ evaluateNextBranch queue visited = case Heap.viewMin queue of
   Just (PathBranch _ pos _ next, remainingQueue) ->
     if Set.member pos visited
       then evaluateNextBranch remainingQueue visited
-      else evaluateNextBranch (foldr Heap.insert remainingQueue next) (Set.insert pos visited)
+      else evaluateNextBranch (foldl' (flip Heap.insert) remainingQueue next) (Set.insert pos visited)
 
 buildPath :: Path pos -> [pos]
 buildPath (PathEnd previous pos _ _) = pos : maybe [] buildPath previous
 buildPath (PathBranch previous pos _ _) = pos : maybe [] buildPath previous
 
-findSolutionFrom :: (Ord pos, World world pos) => world -> pos -> Maybe (Solution pos)
+findSolutionFrom :: World world => world -> Pos world -> Maybe (Solution (Pos world))
 findSolutionFrom world pos = do
   root <- findPaths Nothing (pos, 0) world
   evaluateNextBranch (Heap.singleton root) Set.empty

@@ -9,11 +9,10 @@ import Data.List (singleton)
 import Data.Map qualified as M
 import Data.Maybe (catMaybes, mapMaybe)
 import Data.Traversable (for)
-import Dijkstra
+import Dijkstra qualified
 import Direction
 import Util (safeHead, safeLast, split, trim)
-
-type Pos = (Int, Int)
+import Data.Pos (Pos(..))
 
 data Valley = Valley
   { blizzards :: M.Map Pos [Direction], -- every position not in the map is a wall
@@ -28,7 +27,7 @@ parse :: String -> Either String Valley
 parse input = do
   lines <- for (zip [0 ..] $ filter (not . null) $ map (trim isSpace) $ split '\n' input) $ \(y, line) ->
     fmap catMaybes $ for (zip [0 ..] line) $ \(x, c) ->
-        fmap ((x, y),) <$> do
+        fmap (Pos x y,) <$> do
           case c of
             '#' -> Right Nothing
             '.' -> Right $ Just []
@@ -37,11 +36,11 @@ parse input = do
             'v' -> Right $ Just [DirDown]
             '<' -> Right $ Just [DirLeft]
             c -> Left $ "Failed too parse tile " <> show c
-  start <- maybeToEither "Failed to find start" $ fmap fst (safeHead lines >>= find (snd >>> (== [])))
-  dest <- maybeToEither "Failed to find end" $ fmap fst (safeLast lines >>= find (snd >>> (== [])))
+  start <- (maybeToEither "Failed to find start" $ fmap fst (safeHead lines >>= find (snd >>> (== [])))) :: Either String Pos
+  dest <- (maybeToEither "Failed to find end" $ fmap fst (safeLast lines >>= find (snd >>> (== [])))) :: Either String Pos
   let assocs = concat lines
   let blizzards = M.fromList assocs
-  let end = (fst dest + 1, snd dest)
+  let end = Pos (dest.x + 1) dest.y
   pure $ Valley {start, dest, blizzards, end, minute = 0}
 
 moveBlizzards :: Valley -> Valley
@@ -58,25 +57,25 @@ moveBlizzards valley = valley {blizzards = newBlizzards, minute = valley.minute 
         [] -> pure (pos, [])
         blizzards -> moveBlizzard pos =<< blizzards
 
-    moveBlizzard pos@(x, y) blizzard = [(pos, []), (wrapPos newPos, [blizzard])]
+    moveBlizzard pos@(Pos x y) blizzard = [(pos, []), (wrapPos newPos, [blizzard])]
       where
-        newPos = (x + directionX blizzard, y + directionY blizzard)
+        newPos = Pos (x + directionX blizzard) (y + directionY blizzard)
 
-        wrapPos (x, y) | x <= 0 = wrapPos (fst valley.end - 1, y)
-        wrapPos (x, y) | y <= 0 = wrapPos (x, snd valley.end - 1)
-        wrapPos (x, y) | x >= fst valley.end = wrapPos (1, y)
-        wrapPos (x, y) | y >= snd valley.end = wrapPos (x, 1)
+        wrapPos (Pos x y) | x <= 0 = wrapPos $ Pos (valley.end.x - 1) y
+        wrapPos (Pos x y) | y <= 0 = wrapPos $ Pos x (valley.end.y - 1)
+        wrapPos (Pos x y) | x >= valley.end.x = wrapPos $ Pos 1 y
+        wrapPos (Pos x y) | y >= valley.end.y = wrapPos $ Pos x 1
         wrapPos pos = pos
 
 data Action = Wait | Move Direction
 
 possibleActions :: Valley -> Pos -> [Action]
-possibleActions valley pos@(x, y) = moveActions <> waitAction
+possibleActions valley pos = moveActions <> waitAction
   where
     moveActions =
       mapMaybe
         ( \dir -> do
-            let newPos = (x + directionX dir, y + directionY dir)
+            let newPos = Pos (pos.x + directionX dir) (pos.y + directionY dir)
             blizzards <- M.lookup newPos valley.blizzards
             case blizzards of
               [] -> Just $ Move dir
@@ -104,21 +103,22 @@ instance Ord ValleyWorldPos where
       c -> c
     c -> c
 
-instance World ValleyWorld ValleyWorldPos where
+instance Dijkstra.World ValleyWorld where
+  type Pos ValleyWorld = ValleyWorldPos
   lookupCell (ValleyWorldPos phase pos valleys) ValleyWorld = do
     valley <- safeHead valleys
     _ <- M.lookup pos valley.blizzards
     case phase of
-      ToGoalSecond | valley.dest == pos -> Just $ Destination 1
-      _ -> Just $ Cell 1
+      ToGoalSecond | valley.dest == pos -> Just $ Dijkstra.Destination 1
+      _ -> Just $ Dijkstra.Cell 1
 
-  adjacentCells (ValleyWorldPos phase pos@(x, y) valleys) ValleyWorld = do
+  adjacentCells (ValleyWorldPos phase pos@(Pos x y) valleys) ValleyWorld = do
     valley <- maybe [] singleton $ safeHead valleys
     let nextValleys = tail valleys
     possibleActions valley pos <&> \case
       Wait -> ValleyWorldPos phase pos nextValleys
       Move direction -> do
-        let newPos = (x + directionX direction, y + directionY direction)
+        let newPos = Pos (x + directionX direction) (y + directionY direction)
         case phase of
           ToGoalFirst | valley.dest == newPos -> ValleyWorldPos BackToStart newPos nextValleys
           BackToStart | valley.start == newPos -> ValleyWorldPos ToGoalSecond newPos nextValleys
@@ -128,8 +128,8 @@ solve :: Phase -> Valley -> String
 solve startPhase valley = do
   let valleys = iterate moveBlizzards valley
   let startPos = ValleyWorldPos startPhase valley.start valleys
-  let solution = findSolutionFrom ValleyWorld startPos
-  maybe "No Solution Found!" (show . subtract 2 . cost) solution
+  let solution = Dijkstra.findSolutionFrom ValleyWorld startPos
+  maybe "No Solution Found!" (show . subtract 2 . Dijkstra.cost) solution
 
 partOne :: String -> Either String String
 partOne = fmap (solve ToGoalSecond) <$> parse
