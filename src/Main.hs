@@ -23,7 +23,7 @@ import Year2021 qualified
 import Year2022 qualified
 import Control.Parallel.Strategies
 
-data PartName = PartOne | PartTwo
+data PartName = PartOne | PartTwo | Both
   deriving (Show)
 
 newtype DayIndex = DayIndex Int deriving (NFData)
@@ -56,6 +56,9 @@ parsePart = \case
   "two" -> Right PartTwo
   "1" -> Right PartOne
   "2" -> Right PartTwo
+  "both" -> Right Both
+  "all" -> Right Both
+  "12" -> Right Both
   part -> Left $ "unexpected part '" <> part <> "' use either 'one', 'two', '1' or '2'"
 
 parseArgs :: [String] -> Either String Args
@@ -65,7 +68,7 @@ parseArgs ("--stdin" : rest) =
   parseArgs rest <&> \case
     SpecificDay y d p _ -> SpecificDay y d p Stdin
     a -> a
-parseArgs [year, day] = parseArgs [year, day, "one"]
+parseArgs [year, day] = parseArgs [year, day, "both"]
 parseArgs [year, day, part] = do
   year <- readInt year >>= validateYear
   case day of
@@ -84,6 +87,11 @@ abort error = hPutStrLn stderr error >> exitFailure
 chooseSolveFunction :: PartName -> Day -> Part
 chooseSolveFunction PartOne day = partOne day
 chooseSolveFunction PartTwo day = partTwo day
+chooseSolveFunction Both day = \input -> do
+  p1 <- partOne day input
+  p2 <- partTwo day input
+  Right $ p1 <> " \n" <> p2
+
 
 years :: [Year]
 years =

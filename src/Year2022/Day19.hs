@@ -1,12 +1,12 @@
 module Year2022.Day19 (partOne, partTwo) where
 
-import Data.Array as Array
+import Control.Parallel.Strategies
 import Data.Char (isSpace)
-import Data.Functor ((<&>))
 import Data.Heap qualified as Heap
+import Data.List (foldl')
 import Data.Maybe (mapMaybe)
 import Data.Set qualified as S
-import Util (readInt, rightToMaybe, split, trim)
+import Util (nthTriangle, readInt, rightToMaybe, split, trim)
 
 newtype OreCost = OreCost {ore :: Int} deriving (Eq, Show)
 
@@ -48,27 +48,17 @@ parseBlueprint line = do
 parse :: String -> Either String [Blueprint]
 parse = traverse parseBlueprint . filter (not . null) . map (trim isSpace) . lines
 
-data Resource = Ore | Clay | Obsidian | Geode
-  deriving (Show, Eq, Ord)
+data Resource = Ore | Clay | Obsidian | Geode deriving (Show, Eq, Ord)
 
 allResources :: [Resource]
 allResources = [Ore, Clay, Obsidian, Geode]
 
-newtype Robot = Robot Resource
-  deriving (Show, Eq, Ord)
+newtype Robot = Robot Resource deriving (Show, Eq, Ord)
 
 allRobots :: [Robot]
 allRobots = map Robot allResources
 
-data Action = DoNothing | Build Robot
-  deriving (Eq, Ord)
-
-instance Show Action where
-  show DoNothing = "None"
-  show (Build (Robot Ore)) = " Ore "
-  show (Build (Robot Clay)) = "Clay"
-  show (Build (Robot Obsidian)) = "Obsi"
-  show (Build (Robot Geode)) = "Geod"
+data Action = DoNothing | Build Robot deriving (Eq, Ord)
 
 data InnerState = InnerState
   { minutesLeft :: Int,
@@ -86,47 +76,42 @@ data InnerState = InnerState
 data State = State
   { blueprint :: Blueprint,
     inner :: InnerState,
-    geodesProduced :: Int,
-    previousActions :: [Action]
+    geodesProduced :: Int
   }
   deriving (Eq, Show)
-
-fact :: Int -> Int
-fact n | n < 0 = 0
-fact n = n + fact (n - 1)
-
-facts :: Array.Array Int Int
-facts = Array.array (0, 50) [(i, fact i) | i <- [0 .. 50]]
-
-fastFact :: Int -> Int
-fastFact n | n < 0 = 0
-fastFact n = facts ! n
 
 geodeRobot :: Robot
 geodeRobot = Robot Geode
 
 testEnoughResources :: Robot -> State -> Bool
-testEnoughResources (Robot Ore) (State (Blueprint {oreRobotCost}) state _ _) = state.availableOre >= oreRobotCost.ore
-testEnoughResources (Robot Clay) (State (Blueprint {clayRobotCost}) state _ _) = state.availableOre >= clayRobotCost.ore
-testEnoughResources (Robot Obsidian) (State (Blueprint {obsidianRobotCost}) state _ _) = state.availableOre >= obsidianRobotCost.ore && state.availableClay >= obsidianRobotCost.clay
-testEnoughResources (Robot Geode) (State (Blueprint {geodeRobotCost}) state _ _) = state.availableOre >= geodeRobotCost.ore && state.availableObsidian >= geodeRobotCost.obsidian
+testEnoughResources (Robot Ore) State {blueprint = Blueprint {oreRobotCost}, inner = state} = state.availableOre >= oreRobotCost.ore
+testEnoughResources (Robot Clay) State {blueprint = Blueprint {clayRobotCost}, inner = state} = state.availableOre >= clayRobotCost.ore
+testEnoughResources (Robot Obsidian) State {blueprint = Blueprint {obsidianRobotCost}, inner = state} = state.availableOre >= obsidianRobotCost.ore && state.availableClay >= obsidianRobotCost.clay
+testEnoughResources (Robot Geode) State {blueprint = Blueprint {geodeRobotCost}, inner = state} = state.availableOre >= geodeRobotCost.ore && state.availableObsidian >= geodeRobotCost.obsidian
 
 useResources :: Robot -> State -> Maybe State
-useResources (Robot Ore) (State b@(Blueprint {oreRobotCost}) state p a) = if state.availableOre < oreRobotCost.ore then Nothing else Just $ State b (state {availableOre = state.availableOre - oreRobotCost.ore}) p a
-useResources (Robot Clay) (State b@(Blueprint {clayRobotCost}) state p a) = if state.availableOre < clayRobotCost.ore then Nothing else Just $ State b (state {availableOre = state.availableOre - clayRobotCost.ore}) p a
-useResources (Robot Obsidian) (State b@(Blueprint {obsidianRobotCost}) state p a) = if state.availableOre < obsidianRobotCost.ore || state.availableClay < obsidianRobotCost.clay then Nothing else Just $ State b (state {availableOre = state.availableOre - obsidianRobotCost.ore, availableClay = state.availableClay - obsidianRobotCost.clay}) p a
-useResources (Robot Geode) (State b@(Blueprint {geodeRobotCost}) state p a) = if state.availableOre < geodeRobotCost.ore || state.availableObsidian < geodeRobotCost.obsidian then Nothing else Just $ State b (state {availableOre = state.availableOre - geodeRobotCost.ore, availableObsidian = state.availableObsidian - geodeRobotCost.obsidian}) p a
+useResources robot s@State {blueprint = b@Blueprint {oreRobotCost, clayRobotCost, obsidianRobotCost, geodeRobotCost}, inner = state} = case robot of
+  Robot Ore | state.availableOre < oreRobotCost.ore -> Nothing
+  Robot Ore -> Just $ s {inner = state {availableOre = state.availableOre - oreRobotCost.ore}}
+  Robot Clay | state.availableOre < clayRobotCost.ore -> Nothing
+  Robot Clay -> Just $ s {inner = state {availableOre = state.availableOre - clayRobotCost.ore}}
+  Robot Obsidian | state.availableOre < obsidianRobotCost.ore || state.availableClay < obsidianRobotCost.clay -> Nothing
+  Robot Obsidian -> Just $ s {inner = state {availableOre = state.availableOre - obsidianRobotCost.ore, availableClay = state.availableClay - obsidianRobotCost.clay}}
+  Robot Geode | state.availableOre < geodeRobotCost.ore || state.availableObsidian < geodeRobotCost.obsidian -> Nothing
+  Robot Geode -> Just $ s {inner = state {availableOre = state.availableOre - geodeRobotCost.ore, availableObsidian = state.availableObsidian - geodeRobotCost.obsidian}}
 
 mostPossibleGeodes :: State -> Int
-mostPossibleGeodes state@(State _ s p _) = estimateWithoutNewRobots + producedFromNewRobots
+mostPossibleGeodes state@(State _ s p) = estimateWithoutNewRobots + producedFromNewRobots
   where
     estimateWithoutNewRobots = p + (s.minutesLeft * s.geodeRobots)
     -- if a new geode robot would be built every minute
-    producedFromNewRobots = if testEnoughResources geodeRobot state then fastFact s.minutesLeft else fastFact (s.minutesLeft - 1)
+    producedFromNewRobots = if testEnoughResources geodeRobot state then nthTriangle s.minutesLeft else nthTriangle (s.minutesLeft - 1)
 
 instance Ord State where
-  compare ls@(State _ l _ _) rs@(State _ r _ _) = case compare (mostPossibleGeodes ls) (mostPossibleGeodes rs) of
-    EQ -> compare l.minutesLeft r.minutesLeft
+  compare ls@(State _ l _) rs@(State _ r _) = case compare (mostPossibleGeodes ls) (mostPossibleGeodes rs) of
+    EQ -> case compare l.minutesLeft r.minutesLeft of
+      EQ -> compare l.availableObsidian r.availableObsidian
+      r -> r
     r -> r
 
 initialState :: Blueprint -> Int -> State
@@ -145,37 +130,34 @@ initialState blueprint minutesLeft =
             obsidianRobots = 0,
             geodeRobots = 0
           },
-      geodesProduced = 0,
-      previousActions = []
+      geodesProduced = 0
+    }
+
+collectMinerals :: State -> State
+collectMinerals state =
+  state
+    { inner =
+        state.inner
+          { availableOre = state.inner.availableOre + state.inner.oreRobots,
+            availableClay = state.inner.availableClay + state.inner.clayRobots,
+            availableObsidian = state.inner.availableObsidian + state.inner.obsidianRobots,
+            availableGeodes = state.inner.availableGeodes + state.inner.geodeRobots
+          },
+      geodesProduced = state.geodesProduced + state.inner.geodeRobots
     }
 
 simulate :: State -> Action -> Maybe State
-simulate state action = simulateFactory $ advanceTime $ appendAction state
+simulate state action = simulateFactory $ advanceTime state
   where
-    collectMinerals (State b state p a) =
-      State
-        b
-        ( state
-            { availableOre = state.availableOre + state.oreRobots,
-              availableClay = state.availableClay + state.clayRobots,
-              availableObsidian = state.availableObsidian + state.obsidianRobots,
-              availableGeodes = state.availableGeodes + state.geodeRobots
-            }
-        )
-        (p + state.geodeRobots)
-        a
-
-    advanceTime (State b state p a) = State b (state {minutesLeft = state.minutesLeft - 1}) p a
-    appendAction (State b state p actions) = State b state p (action : actions)
-
+    advanceTime state@(State {inner}) = state {inner = state.inner {minutesLeft = state.inner.minutesLeft - 1}}
     simulateFactory = case action of
       DoNothing -> Just . collectMinerals
       Build robot -> fmap (addRobot robot . collectMinerals) . useResources robot
 
-    addRobot (Robot Ore) (State b state p a) = State b (state {oreRobots = state.oreRobots + 1}) p a
-    addRobot (Robot Clay) (State b state p a) = State b (state {clayRobots = state.clayRobots + 1}) p a
-    addRobot (Robot Obsidian) (State b state p a) = State b (state {obsidianRobots = state.obsidianRobots + 1}) p a
-    addRobot (Robot Geode) (State b state p a) = State b (state {geodeRobots = state.geodeRobots + 1}) p a
+    addRobot (Robot Ore) state@State {inner} = state {inner = state.inner {oreRobots = state.inner.oreRobots + 1}}
+    addRobot (Robot Clay) state@State {inner} = state {inner = state.inner {clayRobots = state.inner.clayRobots + 1}}
+    addRobot (Robot Obsidian) state@State {inner} = state {inner = state.inner {obsidianRobots = state.inner.obsidianRobots + 1}}
+    addRobot (Robot Geode) state@State {inner} = state {inner = state.inner {geodeRobots = state.inner.geodeRobots + 1}}
 
 allActions :: [Action]
 allActions = map Build (reverse allRobots) <> [DoNothing]
@@ -187,10 +169,9 @@ tryActionIfUseful state@(State {blueprint = Blueprint {maxOreCost, maxClayCost, 
   (Build (Robot Obsidian)) | s.obsidianRobots >= maxObsidianCost -> Nothing
   action -> simulate state action
 
-newtype ReversedOrd a = ReversedOrd a
-  deriving (Eq)
+newtype ReversedOrd a = ReversedOrd a deriving (Eq)
 
-instance Ord a => Ord (ReversedOrd a) where
+instance (Ord a) => Ord (ReversedOrd a) where
   compare (ReversedOrd a) (ReversedOrd b) = compare b a
 
 solveBlueprint :: Int -> Blueprint -> State
@@ -201,32 +182,32 @@ solveBlueprint minutesLeft blueprint = f S.empty 0 (Heap.singleton (ReversedOrd 
     f :: S.Set InnerState -> Int -> Heap.Heap (ReversedOrd State) -> State
     f seen mostGeodes queue = case Heap.viewMin queue of
       Nothing -> init
-      Just (ReversedOrd state@(State _ s _ _), _) | s.minutesLeft == 0 -> state
-      Just (ReversedOrd (State _ s _ _), queue) | S.member s seen -> f seen mostGeodes queue
-      Just (ReversedOrd state@(State _ s p _), queue) ->
-        let newSeen = S.insert s seen
-            newMostGeodes = max mostGeodes p
-            tryActionIfUsefulHere = tryActionIfUseful state
+      Just (ReversedOrd s@(State {inner = state}), _) | state.minutesLeft == 0 -> s
+      Just (ReversedOrd State {inner = state}, queue) | S.member state seen -> f seen mostGeodes queue
+      Just (ReversedOrd s@State {inner = state, geodesProduced}, queue) ->
+        let newSeen = S.insert state seen
+            newMostGeodes = max mostGeodes geodesProduced
+            tryActionIfUsefulHere = tryActionIfUseful s
             folding queue action = forEachPossibleState newMostGeodes seen queue (tryActionIfUsefulHere action)
-            newQueue = foldl folding queue allActions
+            newQueue = foldl' folding queue allActions
          in f newSeen newMostGeodes newQueue
 
     forEachPossibleState :: Int -> S.Set InnerState -> Heap.Heap (ReversedOrd State) -> Maybe State -> Heap.Heap (ReversedOrd State)
     forEachPossibleState _ _ queue Nothing = queue
     forEachPossibleState _ seen queue (Just nextState) | S.member nextState.inner seen = queue
-    forEachPossibleState mostGeodes _ queue (Just nextState) | mostPossibleGeodes nextState < mostGeodes = queue
+    forEachPossibleState mostGeodes _ queue (Just nextState) | mostPossibleGeodes nextState <= mostGeodes = queue
     forEachPossibleState _ _ queue (Just nextState) = Heap.insert (ReversedOrd nextState) queue
 
 solvePartOne :: [Blueprint] -> Int
-solvePartOne blueprints = sum $ map scoreBlueprint blueprints
+solvePartOne = sum . (`using` parList rdeepseq) . map scoreBlueprint
   where
     scoreBlueprint blueprint@(Blueprint {id}) = id * (solveBlueprint 24 blueprint).geodesProduced
 
 solvePartTwo :: [Blueprint] -> Int
-solvePartTwo blueprints = product $ map ((.geodesProduced) . solveBlueprint 32) $ take 3 blueprints
+solvePartTwo = product . (`using` parList rdeepseq) . map ((.geodesProduced) . solveBlueprint 32) . take 3
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input

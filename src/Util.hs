@@ -150,8 +150,8 @@ maybeToRight error Nothing = Left error
 maybeToRight error (Just value) = Right value
 
 applyN :: Int -> (a -> a) -> a -> a
-applyN 0 f v = v
-applyN n f v = applyN (n - 1) f (f v)
+applyN 0 f  v = v
+applyN n f !v = applyN (n - 1) f (f v)
 
 listToTuple :: [a] -> Maybe (a, a)
 listToTuple [a, b] = Just (a, b)
@@ -226,4 +226,7 @@ findMap f = safeHead . mapMaybe f
 
 forWithIndex :: Applicative m => [a] -> (Int -> a -> m b) -> m [b]
 forWithIndex xs f = for (zip [0..] xs) (uncurry f)
+
+nthTriangle :: Integral n => n -> n
+nthTriangle n = (n * n + n) `div` 2
 
