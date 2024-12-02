@@ -2,7 +2,7 @@ module Main (main) where
 
 import Configuration.Dotenv qualified as Dotenv
 import Control.Exception
-import Control.Monad (forM_, void, forM)
+import Control.Monad (forM, forM_, void)
 import Data.Char (isSpace)
 import Data.Functor ((<&>))
 import Data.List (find, sort)
@@ -18,10 +18,11 @@ import System.Exit (exitFailure)
 import System.IO (hPrint, hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
 
+import Control.Parallel.Strategies
 import Util (Unwrap (unwrap), readInt, trim)
 import Year2021 qualified
 import Year2022 qualified
-import Control.Parallel.Strategies
+import Year2024 qualified
 
 data PartName = PartOne | PartTwo | Both
   deriving (Show)
@@ -92,11 +93,11 @@ chooseSolveFunction Both day = \input -> do
   p2 <- partTwo day input
   Right $ p1 <> " \n" <> p2
 
-
 years :: [Year]
 years =
-  [ Year2021.year,
-    Year2022.year
+  [ Year2021.year
+  , Year2022.year
+  , Year2024.year
   ]
 
 cookie :: String
