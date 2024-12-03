@@ -230,3 +230,8 @@ forWithIndex xs f = for (zip [0..] xs) (uncurry f)
 nthTriangle :: Integral n => n -> n
 nthTriangle n = (n * n + n) `div` 2
 
+pairs :: [a] -> [(a, a)]
+pairs [] = []
+pairs [_] = []
+pairs (x : y : xs) = (x, y) : pairs (y : xs)
+

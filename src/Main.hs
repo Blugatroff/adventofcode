@@ -22,6 +22,7 @@ import Control.Parallel.Strategies
 import Util (Unwrap (unwrap), readInt, trim)
 import Year2021 qualified
 import Year2022 qualified
+import Year2023 qualified
 import Year2024 qualified
 
 data PartName = PartOne | PartTwo | Both
@@ -97,6 +98,7 @@ years :: [Year]
 years =
   [ Year2021.year
   , Year2022.year
+  , Year2023.year
   , Year2024.year
   ]
 
