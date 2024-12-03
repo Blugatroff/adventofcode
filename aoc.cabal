@@ -72,6 +72,12 @@ executable aoc
       Year2022.Day7
       Year2022.Day8
       Year2022.Day9
+      Year2023
+      Year2023.Day5
+      Year2024
+      Year2024.Day1
+      Year2024.Day2
+      Year2024.Day3
       Paths_aoc
   hs-source-dirs:
       src

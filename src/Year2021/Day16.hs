@@ -2,13 +2,14 @@
 
 module Year2021.Day16 (partOne, partTwo) where
 
-import Control.Monad.Except (ExceptT, lift, runExceptT)
-import Control.Monad.State (MonadState (put), State, evalState, get, gets, modify)
+import Control.Monad.Except (ExceptT, runExceptT)
+import Control.Monad.State (MonadState (put), State, evalState, get, gets, lift, modify)
 import Control.Monad.Trans.Except (throwE)
 import Data.Bits (shiftL, (.|.))
 import Data.Function ((&))
 import Data.Functor (($>), (<&>))
 import Data.List (foldl')
+import Util (safeHead)
 
 data Bit = Zero | One
 
@@ -61,15 +62,12 @@ data Packet = Literal !Int !Int | Operator !OperatorType !Int ![Packet]
 
 takeN :: Int -> State Bits Bits
 takeN n = do
-  b <- get <&> bits <&> take n <&> Bits
+  b <- gets $ Bits . take n . bits
   modify (Bits . (drop n . bits))
   return b
 
 takeOne :: State Bits (Maybe Bit)
-takeOne =
-  takeN 1 <&> bits <&> \case
-    (b : rest) -> Just b
-    [] -> Nothing
+takeOne = safeHead . bits <$> takeN 1
 
 parseLiteralBits :: ExceptT String (State Bits) Bits
 parseLiteralBits = do
