@@ -1,73 +1,101 @@
 module Year2024.Day6 (partOne, partTwo) where
 
 import Control.Monad (guard)
-import Data.Array.IArray (Array, Ix (..), array, assocs, bounds, indices, (!), (//))
+import Control.Monad.ST.Strict (ST, runST)
+import Data.Array.IArray (Ix (..), array, assocs, bounds, (!), (//))
+import Data.Array.MArray (MArray (newArray), readArray, writeArray)
+import Data.Array.ST (STUArray)
+import Data.Array.Unboxed (UArray)
 import Data.Either.Extra (maybeToEither)
-import Data.Maybe (mapMaybe)
-import Data.Set (Set)
-import Data.Set qualified as Set
+import Data.Maybe (mapMaybe, isNothing)
+import Data.Word (Word8)
 import Direction (Direction (..), directionX, directionY, turnRight)
 import Util
+import Control.Parallel.Strategies (parList, runEval, rdeepseq)
 
-data Tile = Empty | Obstacle | Guard Direction deriving (Eq, Show)
+type Tile = Word8 -- data Tile = Empty | Obstacle | Guard Direction deriving (Eq, Show)
 
-type LabMap = Array (Int, Int) Tile
+empty, obstacle, guardUp, guardDown, guardLeft, guardRight :: Tile
+empty = 0
+obstacle = 1
+guardUp = 2
+guardDown = 3
+guardLeft = 4
+guardRight = 5
+
+type Pos = (Int, Int)
+
+type LabMap = UArray Pos Tile
 
 parse :: String -> Either String LabMap
 parse input = do
   tiles <- traverse (traverse parseTile) $ filter (not . null) $ map trimSpace $ lines input
   let height = length tiles
   let width = length (head tiles)
-  Right $ array ((1, 1), (width, height)) $ do
-    (y, row) <- zip [1 ..] tiles
-    (x, tile) <- zip [1 ..] row
+  Right $ array ((0, 0), (width - 1, height - 1)) $ do
+    (y, row) <- zip [0 ..] tiles
+    (x, tile) <- zip [0 ..] row
     pure ((x, y), tile)
  where
   parseTile = \case
-    '.' -> Right Empty
-    '#' -> Right Obstacle
-    '^' -> Right $ Guard DirUp
-    '>' -> Right $ Guard DirRight
-    '<' -> Right $ Guard DirLeft
-    'v' -> Right $ Guard DirDown
+    '.' -> Right empty
+    '#' -> Right obstacle
+    '^' -> Right guardUp
+    '>' -> Right guardRight
+    '<' -> Right guardLeft
+    'v' -> Right guardDown
     c -> Left $ "Failed to parse tile: " <> show c
 
-findGuard :: LabMap -> Either String ((Int, Int), Direction)
+findGuard :: LabMap -> Either String (Pos, Direction)
 findGuard lab = case guards of
   [guard] -> Right guard
   _ -> Left "failed to find exactly one guard"
  where
-  guards = mapMaybe (\(pos, tile) -> case tile of Guard dir -> Just (pos, dir); _ -> Nothing) $ assocs lab
+  guards = mapMaybe extractGuard $ assocs lab
+  extractGuard :: (Pos, Tile) -> Maybe (Pos, Direction)
+  extractGuard (pos, tile) = case tile of
+    tile | tile == guardUp -> Just (pos, DirUp)
+    tile | tile == guardDown -> Just (pos, DirDown)
+    tile | tile == guardLeft -> Just (pos, DirLeft)
+    tile | tile == guardRight -> Just (pos, DirRight)
+    _ -> Nothing
 
-walk :: Set ((Int, Int), Direction) -> LabMap -> Direction -> (Int, Int) -> Maybe [(Int, Int)]
-walk visited lab dir pos@(x, y) = do
-  let pos' = (x + directionX dir, y + directionY dir)
-  if inRange (bounds lab) pos'
-    then
-      if lab ! pos' == Obstacle
-        then walk visited lab (turnRight dir) pos
-        else do
-          if Set.member (pos', dir) visited
-            then Nothing
-            else (pos' :) <$> walk (Set.insert (pos', dir) visited) lab dir pos'
-    else Just []
+walk :: LabMap -> Direction -> Pos -> Maybe [Pos]
+walk lab dir pos = runST $ do
+  let ((minX, minY), (maxX, maxY)) = bounds lab
+  visited <-
+    newArray (((minX, minY), minBound), ((maxX, maxY), maxBound)) False ::
+      ST r (STUArray r (Pos, Direction) Bool)
+  let go path dir pos@(x, y) = do
+        let pos' = (x + directionX dir, y + directionY dir)
+        case inRange (bounds lab) pos' of
+          False -> pure $ Just path
+          True | lab ! pos' == obstacle -> do
+            let posDir = (pos', dir)
+            readArray visited posDir >>= \case
+              True -> do
+                pure Nothing
+              False -> do
+                writeArray visited posDir True
+                go path (turnRight dir) pos
+          True -> go (pos' : path) dir pos'
+  go [] dir pos
 
 partOne :: String -> Either String String
 partOne input = do
   lab <- parse input
   (pos, dir) <- findGuard lab
-  path <- maybeToEither "Cycle detected" $ walk Set.empty lab dir pos
+  path <- maybeToEither "Cycle detected" $ walk lab dir pos
   Right $ show $ length $ dedup $ pos : path
 
 partTwo :: String -> Either String String
 partTwo input = do
   lab <- parse input
   (guardPos, dir) <- findGuard lab
-  Right $ show $ length $ do
-    pos <- indices lab
+  path <- maybeToEither "Cycle detected" $ walk lab dir guardPos
+  Right $ show $ length $ filter id $ runEval $ parList rdeepseq $ do
+    pos <- fst <$> dedup path
     guard (pos /= guardPos)
-    guard (lab ! pos /= Obstacle)
-    let modifiedLab = lab // [(pos, Obstacle)]
-    case walk Set.empty modifiedLab dir guardPos of
-      Nothing -> [pos]
-      Just _ -> []
+    guard (lab ! pos /= obstacle)
+    let modifiedLab = lab // [(pos, obstacle)]
+    pure $ isNothing $ walk modifiedLab dir guardPos
