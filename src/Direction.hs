@@ -23,12 +23,12 @@ turnRight DirRight = DirDown
 turnRight DirDown = DirLeft
 turnRight DirLeft = DirUp
 
-directionX :: Direction -> Int
+directionX :: Num a => Direction -> a
 directionX DirRight = 1
 directionX DirLeft = -1
 directionX _ = 0
 
-directionY :: Direction -> Int
+directionY :: Num a => Direction -> a
 directionY DirDown = 1
 directionY DirUp = -1
 directionY _ = 0
