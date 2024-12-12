@@ -78,7 +78,8 @@ executable aoc
       Year2024.Day1
       Year2024.Day2
       Year2024.Day3
-      Paths_aoc
+      Year2024.Day4
+      Year2024.Day5
   hs-source-dirs:
       src
   default-extensions:
