@@ -1,6 +1,7 @@
 module Direction(Direction(..), allDirections, directionAxis, directionX, directionY, turnLeft, turnRight) where
+import Data.Array (Ix)
 
-data Direction = DirDown | DirUp | DirLeft | DirRight deriving (Eq, Ord, Show)
+data Direction = DirDown | DirUp | DirLeft | DirRight deriving (Eq, Ord, Show, Bounded, Enum, Ix)
 
 allDirections :: [Direction]
 allDirections = [DirUp, DirRight, DirDown, DirLeft]

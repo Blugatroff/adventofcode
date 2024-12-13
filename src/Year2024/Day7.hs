@@ -1,7 +1,7 @@
 module Year2024.Day7 (partOne, partTwo) where
 
 import Data.Either.Extra (maybeToEither)
-import Util (readInt, split, splitOnce, trimSpace)
+import Util (parFilter, readInt, split, splitOnce, trimSpace)
 
 type Equation = (Int, [Int])
 
@@ -26,13 +26,12 @@ couldPossiblyBeTrue operations (expected, first : nums) = calculate nums first
   calculate (x : xs) v = any (\f -> calculate xs $ f v x) operations
 
 solution :: [Operation] -> [Equation] -> Int
-solution operations = sum . map fst . filter (couldPossiblyBeTrue operations)
+solution operations = sum . map fst . parFilter (couldPossiblyBeTrue operations)
 
 partOne :: String -> Either String String
 partOne = fmap (show . solution [(*), (+)]) . parse
 
 concatenate :: Operation
-concatenate x 1 = x * 10 + 1
 concatenate x y = x * (10 ^ ySize) + y
  where
   ySize :: Int = ceiling (logBase 10 (fromIntegral (y + 1)) :: Float)

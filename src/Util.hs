@@ -11,6 +11,7 @@ import Text.Read (readEither)
 import Data.Maybe (mapMaybe, fromMaybe)
 import Data.Char (isSpace)
 import Data.Traversable (for)
+import Control.Parallel.Strategies (parMap, evalTuple2, r0, rdeepseq)
 
 split :: Eq a => a -> [a] -> [[a]]
 split del [] = []
@@ -234,4 +235,7 @@ pairs :: [a] -> [(a, a)]
 pairs [] = []
 pairs [_] = []
 pairs (x : y : xs) = (x, y) : pairs (y : xs)
+
+parFilter :: (a -> Bool) -> [a] -> [a]
+parFilter f = map fst . filter snd . parMap (evalTuple2 r0 rdeepseq) (\x -> (x, f x))
 

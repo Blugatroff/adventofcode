@@ -7,11 +7,10 @@ import Data.Array.MArray (MArray (newArray), readArray, writeArray)
 import Data.Array.ST (STUArray)
 import Data.Array.Unboxed (UArray)
 import Data.Either.Extra (maybeToEither)
-import Data.Maybe (mapMaybe, isNothing)
+import Data.Maybe (isNothing, mapMaybe)
 import Data.Word (Word8)
 import Direction (Direction (..), directionX, directionY, turnRight)
 import Util
-import Control.Parallel.Strategies (parList, runEval, rdeepseq)
 
 type Tile = Word8 -- data Tile = Empty | Obstacle | Guard Direction deriving (Eq, Show)
 
@@ -93,7 +92,7 @@ partTwo input = do
   lab <- parse input
   (guardPos, dir) <- findGuard lab
   path <- maybeToEither "Cycle detected" $ walk lab dir guardPos
-  Right $ show $ length $ filter id $ runEval $ parList rdeepseq $ do
+  Right $ show $ length $ parFilter id $ do
     pos <- fst <$> dedup path
     guard (pos /= guardPos)
     guard (lab ! pos /= obstacle)
