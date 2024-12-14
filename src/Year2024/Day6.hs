@@ -11,6 +11,7 @@ import Data.Maybe (isNothing, mapMaybe)
 import Data.Word (Word8)
 import Direction (Direction (..), directionX, directionY, turnRight)
 import Util
+import Data.Pos
 
 type Tile = Word8 -- data Tile = Empty | Obstacle | Guard Direction deriving (Eq, Show)
 
@@ -22,8 +23,6 @@ guardDown = 3
 guardLeft = 4
 guardRight = 5
 
-type Pos = (Int, Int)
-
 type LabMap = UArray Pos Tile
 
 parse :: String -> Either String LabMap
@@ -31,10 +30,10 @@ parse input = do
   tiles <- traverse (traverse parseTile) $ filter (not . null) $ map trimSpace $ lines input
   let height = length tiles
   let width = length (head tiles)
-  Right $ array ((0, 0), (width - 1, height - 1)) $ do
+  Right $ array (Pos 0 0, Pos (width - 1) (height - 1)) $ do
     (y, row) <- zip [0 ..] tiles
     (x, tile) <- zip [0 ..] row
-    pure ((x, y), tile)
+    pure (Pos x y, tile)
  where
   parseTile = \case
     '.' -> Right empty
@@ -61,12 +60,12 @@ findGuard lab = case guards of
 
 walk :: LabMap -> Direction -> Pos -> Maybe [Pos]
 walk lab dir pos = runST $ do
-  let ((minX, minY), (maxX, maxY)) = bounds lab
+  let (min, max) = bounds lab
   visited <-
-    newArray (((minX, minY), minBound), ((maxX, maxY), maxBound)) False ::
+    newArray ((min, minBound), (max, maxBound)) False ::
       ST r (STUArray r (Pos, Direction) Bool)
-  let go path dir pos@(x, y) = do
-        let pos' = (x + directionX dir, y + directionY dir)
+  let go path dir pos = do
+        let pos' = pos + Pos (directionX dir) (directionY dir)
         case inRange (bounds lab) pos' of
           False -> pure $ Just path
           True | lab ! pos' == obstacle -> do
