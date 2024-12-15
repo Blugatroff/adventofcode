@@ -1,19 +1,19 @@
 module Year2024.Day8 (partOne, partTwo) where
 
-import Control.Monad (unless)
-import Data.Array.Unboxed (Array, array, assocs, bounds)
+import Control.Monad (guard, unless)
 import Data.Bifunctor (second)
 import Data.Ix (Ix (..))
 import Data.List (singleton)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
-import Data.Pos
+import Data.Pos (Pos (..), divPos)
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Tuple (swap)
 import Util (trimSpace, tuplePermutations)
 
-type Input = Array Pos Char
+type Bounds = (Pos, Pos)
+type Input = (Bounds, Map Pos Char)
 
 parse :: String -> Either String Input
 parse input = do
@@ -24,30 +24,29 @@ parse input = do
         (x : xs) -> length x
   unless (all ((== width) . length) ls) $ do
     Left "Input is not a rectangle"
-  Right $ array (Pos 1 1, Pos width height) $ do
-    (y, row) <- zip [1 ..] ls
-    (x, tile) <- zip [1 ..] row
-    pure (Pos x y, tile)
+  let antennas = Map.fromList $ do
+        (y, row) <- zip [1 ..] ls
+        (x, tile) <- zip [1 ..] row
+        guard (tile /= '.')
+        pure (Pos x y, tile)
+  Right ((1, Pos width height), antennas)
 
-findAntennas :: Input -> [(Pos, Char)]
-findAntennas = filter ((/= '.') . snd) . assocs
+groupAntennas :: Map Pos Char -> Map Char [Pos]
+groupAntennas = Map.fromListWith (<>) . map (second singleton . swap) . filter ((/= '.') . snd) . Map.assocs
 
-groupAntennas :: [(Pos, Char)] -> Map Char [Pos]
-groupAntennas = Map.fromListWith (<>) . map (second singleton . swap)
-
-solution :: ((Pos, Pos) -> Pos -> Pos -> [Pos]) -> Input -> Int
-solution findAntinodes input = Set.size $ Set.filter (inRange (bounds input)) antinodes
+solution :: (Bounds -> Pos -> Pos -> [Pos]) -> Input -> Int
+solution findAntinodes (bounds, input) = Set.size $ Set.filter (inRange bounds) antinodes
  where
   antinodes :: Set Pos
-  antinodes = foldMap addAntinodesOfFrequency $ Map.assocs $ groupAntennas $ findAntennas input
+  antinodes = foldMap addAntinodesOfFrequency $ Map.assocs $ groupAntennas input
 
   addAntinodesOfFrequency :: (Char, [Pos]) -> Set Pos
-  addAntinodesOfFrequency (freq, antennas) = Set.fromList $ concatMap (uncurry $ findAntinodes (bounds input)) $ tuplePermutations antennas
+  addAntinodesOfFrequency (freq, antennas) = Set.fromList $ concatMap (uncurry $ findAntinodes bounds) $ tuplePermutations antennas
 
 shoot :: Pos -> Pos -> [Pos]
 shoot a b = [b + (b - a), a + (a - b)]
 
-ray :: (Pos, Pos) -> Pos -> Pos -> [Pos]
+ray :: Bounds -> Pos -> Pos -> [Pos]
 ray bounds a b = do
   let delta = b - a
       dir = delta `divPos` gcd delta.x delta.y
