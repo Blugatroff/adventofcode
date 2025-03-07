@@ -2,14 +2,14 @@ module Year2024.Day6 (partOne, partTwo) where
 
 import Control.Monad (guard)
 import Control.Monad.ST.Strict (ST, runST)
-import Data.Array.IArray (Ix (..), array, assocs, bounds, (!), (//))
+import Data.Array.IArray (Ix (..), assocs, bounds, (!), (//))
 import Data.Array.MArray (MArray (newArray), readArray, writeArray)
 import Data.Array.ST (STUArray)
 import Data.Array.Unboxed (UArray)
 import Data.Either.Extra (maybeToEither)
 import Data.Maybe (isNothing, mapMaybe)
 import Data.Word (Word8)
-import Direction (Direction (..), directionX, directionY, turnRight)
+import Direction (Direction (..), turnRight)
 import Util
 import Data.Pos
 
@@ -26,14 +26,7 @@ guardRight = 5
 type LabMap = UArray Pos Tile
 
 parse :: String -> Either String LabMap
-parse input = do
-  tiles <- traverse (traverse parseTile) $ filter (not . null) $ map trimSpace $ lines input
-  let height = length tiles
-  let width = length (head tiles)
-  Right $ array (Pos 0 0, Pos (width - 1) (height - 1)) $ do
-    (y, row) <- zip [0 ..] tiles
-    (x, tile) <- zip [0 ..] row
-    pure (Pos x y, tile)
+parse = parseGrid parseTile
  where
   parseTile = \case
     '.' -> Right empty
@@ -65,7 +58,7 @@ walk lab dir pos = runST $ do
     newArray ((min, minBound), (max, maxBound)) False ::
       ST r (STUArray r (Pos, Direction) Bool)
   let go path dir pos = do
-        let pos' = pos + Pos (directionX dir) (directionY dir)
+        let pos' = pos + Pos dir.x dir.y
         case inRange (bounds lab) pos' of
           False -> pure $ Just path
           True | lab ! pos' == obstacle -> do

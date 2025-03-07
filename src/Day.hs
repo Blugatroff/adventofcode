@@ -14,10 +14,11 @@ data Day = Day
     partTwo :: !Part
   }
 
+instance Show Day where
+  show _ = "Day"
+
 data Year = Year
   { name :: !Int,
     days :: !(M.Map Int Day)
-  }
+  } deriving Show
 
-instance Show Year where
-  show = show . name

@@ -83,6 +83,8 @@ executable aoc
       Year2024.Day6
       Year2024.Day7
       Year2024.Day8
+      Year2024.Day9
+      Year2024.Day10
   hs-source-dirs:
       src
   default-extensions:
@@ -92,6 +94,8 @@ executable aoc
       OverloadedStrings
       StrictData
       TypeFamilies
+      PartialTypeSignatures
+      DataKinds
   ghc-options: 
       -Wall
       -Wcompat

@@ -114,7 +114,7 @@ loadInput year day = do
     Nothing -> do
       hPutStrLn stderr (cookie <> " environment variable missing")
       exitFailure
-  let url = "https://adventofcode.com/" <> show year <> "/day/" <> show day <> "/input"
+  let url = "https://adventofcode.com/" <> show year.name <> "/day/" <> show day <> "/input"
   req <- HTTPSimple.parseRequest url
   let reqWithHeader = HTTPSimple.setRequestHeader HTTPTypes.hCookie [encodeUtf8 ("session=" <> Text.pack session)] req
   response <- catch (HTTPSimple.httpBS reqWithHeader) $ \(exception :: HTTPSimple.HttpException) -> do

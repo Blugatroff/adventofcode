@@ -1,7 +1,23 @@
-module Direction(Direction(..), allDirections, directionAxis, directionX, directionY, turnLeft, turnRight) where
+module Direction (Direction (..), allDirections, directionAxis, turnLeft, turnRight) where
+
 import Data.Array (Ix)
+import GHC.Records (HasField (..))
 
 data Direction = DirDown | DirUp | DirLeft | DirRight deriving (Eq, Ord, Show, Bounded, Enum, Ix)
+
+instance HasField "x" Direction Int where
+  getField = \case
+    DirDown -> 0
+    DirUp -> 0
+    DirLeft -> -1
+    DirRight -> 1
+
+instance HasField "y" Direction Int where
+  getField = \case
+    DirDown -> 1
+    DirUp -> -1
+    DirLeft -> 0
+    DirRight -> 0
 
 allDirections :: [Direction]
 allDirections = [DirUp, DirRight, DirDown, DirLeft]
@@ -23,14 +39,3 @@ turnRight DirUp = DirRight
 turnRight DirRight = DirDown
 turnRight DirDown = DirLeft
 turnRight DirLeft = DirUp
-
-directionX :: Num a => Direction -> a
-directionX DirRight = 1
-directionX DirLeft = -1
-directionX _ = 0
-
-directionY :: Num a => Direction -> a
-directionY DirDown = 1
-directionY DirUp = -1
-directionY _ = 0
-

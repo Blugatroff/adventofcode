@@ -10,6 +10,8 @@ import Year2024.Day5 qualified as Day5
 import Year2024.Day6 qualified as Day6
 import Year2024.Day7 qualified as Day7
 import Year2024.Day8 qualified as Day8
+import Year2024.Day9 qualified as Day9
+import Year2024.Day10 qualified as Day10
 
 days :: M.Map Int Day
 days =
@@ -22,6 +24,8 @@ days =
     , (6, Day Day6.partOne Day6.partTwo)
     , (7, Day Day7.partOne Day7.partTwo)
     , (8, Day Day8.partOne Day8.partTwo)
+    , (9, Day Day9.partOne Day9.partTwo)
+    , (10, Day Day10.partOne Day10.partTwo)
     ]
 
 year :: Year

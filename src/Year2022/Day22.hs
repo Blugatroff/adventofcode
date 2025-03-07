@@ -76,8 +76,8 @@ moveCursor board cursor@(Cursor direction pos@(px, py)) = case M.lookup newPos b
   Just Air -> Cursor direction newPos
   Just Wall -> cursor
   where
-    newX = px + directionX cursor.direction
-    newY = py + directionY cursor.direction
+    newX = px + cursor.direction.x
+    newY = py + cursor.direction.y
     newPos = (newX, newY)
 
     extremes :: Ord b => (a -> b) -> [a] -> Maybe a
@@ -240,8 +240,8 @@ moveCursorOnCube cube cursor@(CubeCursor {face, pos = (px, py), direction}) = fr
     Just Air -> pure $ CubeCursor {pos = newPos, face, direction}
     Just Wall -> pure cursor
   where
-    newX = px + directionX cursor.direction
-    newY = py + directionY cursor.direction
+    newX = px + cursor.direction.x
+    newY = py + cursor.direction.y
     newPos = (newX, newY)
 
     wrap :: CubeCursor -> Maybe CubeCursor

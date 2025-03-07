@@ -2,27 +2,29 @@
 
 module Util where
 
+import Control.Parallel.Strategies (evalTuple2, parMap, r0, rdeepseq)
+import Data.Array.Base (IArray, array)
+import Data.Char (isSpace)
 import Data.Either.Combinators (mapLeft)
 import Data.Function ((&))
 import Data.List (dropWhileEnd, foldl', isPrefixOf, maximumBy, minimumBy)
 import Data.Map qualified as M
+import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Pos (Pos (Pos))
+import Data.Traversable (for)
 import Debug.Trace qualified as Trace
 import Text.Read (readEither)
-import Data.Maybe (mapMaybe, fromMaybe)
-import Data.Char (isSpace)
-import Data.Traversable (for)
-import Control.Parallel.Strategies (parMap, evalTuple2, r0, rdeepseq)
 
-split :: Eq a => a -> [a] -> [[a]]
+split :: (Eq a) => a -> [a] -> [[a]]
 split del [] = []
 split del list = f $ span (/= del) list
-  where
-    f ([], []) = []
-    f ([], _ : rest) = [] : split del rest
-    f (seg, []) = [seg]
-    f (seg, _ : rest) = seg : split del rest
+ where
+  f ([], []) = []
+  f ([], _ : rest) = [] : split del rest
+  f (seg, []) = [seg]
+  f (seg, _ : rest) = seg : split del rest
 
-splitOnce :: Eq a => a -> [a] -> Maybe ([a], [a])
+splitOnce :: (Eq a) => a -> [a] -> Maybe ([a], [a])
 splitOnce del list = case split del list of
   [a, b] -> Just (a, b)
   _ -> Nothing
@@ -30,7 +32,7 @@ splitOnce del list = case split del list of
 lpad :: Int -> a -> [a] -> [a]
 lpad n v l = map (const v) [0 .. (n - length l)] ++ l
 
-replace :: Eq a => [a] -> [a] -> [a] -> [a]
+replace :: (Eq a) => [a] -> [a] -> [a] -> [a]
 replace pat with [] = []
 replace pat with rest =
   if pat `isPrefixOf` rest
@@ -43,14 +45,14 @@ trim f = dropWhileEnd f . dropWhile f
 trimSpace :: String -> String
 trimSpace = trim isSpace
 
-findSeq :: Eq a => [a] -> [a] -> Maybe Int
+findSeq :: (Eq a) => [a] -> [a] -> Maybe Int
 findSeq [] list = Just 0
 findSeq pat list = case span (\v -> v /= head pat) list of
   (before, []) -> Nothing
   (before, match) | pat `isPrefixOf` match -> Just $ length before
   (before, match) -> (+ 1) . (+) (length before) <$> findSeq pat (tail match)
 
-splitSeq :: Eq a => [a] -> [a] -> [[a]]
+splitSeq :: (Eq a) => [a] -> [a] -> [[a]]
 splitSeq del list =
   findSeq del list
     & maybe
@@ -60,15 +62,18 @@ splitSeq del list =
             & \(before, after) -> before : splitSeq del (drop (length del) after)
       )
 
-splitSeqOnce :: Eq a => [a] -> [a] -> Maybe ([a], [a])
+splitSeqOnce :: (Eq a) => [a] -> [a] -> Maybe ([a], [a])
 splitSeqOnce del list = case splitSeq del list of
   [a, b] -> Just (a, b)
   _ -> Nothing
 
-dedup :: Ord a => [a] -> [(a, Int)]
-dedup list = M.toList $ foldl f M.empty list
-  where
-    f map k = M.insertWith (+) k 1 map
+dedup :: (Ord a) => [a] -> [(a, Int)]
+dedup list = M.toList $ foldl (\map k -> M.insertWith (+) k 1 map) M.empty list
+
+dedupBy :: (Ord k) => (a -> k) -> [a] -> [(a, Int)]
+dedupBy key list = M.elems $ foldl f M.empty list
+ where
+  f map v = M.insertWith (\(v, n1) (_, n2) -> (v, n1 + n2)) (key v) (v, 1) map
 
 removeList :: Int -> [a] -> [a]
 removeList _ [] = []
@@ -77,8 +82,8 @@ removeList index (v : list) = v : removeList (index - 1) list
 
 setList :: Int -> a -> [a] -> [a]
 setList index v = zipWith f [0 ..]
-  where
-    f i a = if i == index then v else a
+ where
+  f i a = if i == index then v else a
 
 modifyList :: Int -> (a -> a) -> [a] -> [a]
 modifyList index f = zipWith (\i a -> if i == index then f a else a) [0 ..]
@@ -124,26 +129,26 @@ rightToMaybe :: Either a b -> Maybe b
 rightToMaybe (Left a) = Nothing
 rightToMaybe (Right b) = Just b
 
-maximumByKey :: Ord b => (a -> b) -> [a] -> Maybe a
+maximumByKey :: (Ord b) => (a -> b) -> [a] -> Maybe a
 maximumByKey key [] = Nothing
 maximumByKey key list = Just $ maximumBy (\a b -> compare (key a) (key b)) list
 
-minimumByKey :: Ord b => (a -> b) -> [a] -> Maybe a
+minimumByKey :: (Ord b) => (a -> b) -> [a] -> Maybe a
 minimumByKey key [] = Nothing
 minimumByKey key list = Just $ minimumBy (\a b -> compare (key a) (key b)) list
 
-safeMinimum :: Ord a => [a] -> Maybe a
+safeMinimum :: (Ord a) => [a] -> Maybe a
 safeMinimum [] = Nothing
 safeMinimum list = Just $ minimum list
 
-safeMaximum :: Ord a => [a] -> Maybe a
+safeMaximum :: (Ord a) => [a] -> Maybe a
 safeMaximum [] = Nothing
 safeMaximum list = Just $ maximum list
 
-minimumOrZero :: Ord a => Num a => [a] -> a
+minimumOrZero :: (Ord a) => (Num a) => [a] -> a
 minimumOrZero = fromMaybe 0 . safeMinimum
 
-maximumOrZero :: Ord a => Num a => [a] -> a
+maximumOrZero :: (Ord a) => (Num a) => [a] -> a
 maximumOrZero = fromMaybe 0 . safeMaximum
 
 maybeToRight :: e -> Maybe a -> Either e a
@@ -151,7 +156,7 @@ maybeToRight error Nothing = Left error
 maybeToRight error (Just value) = Right value
 
 applyN :: Int -> (a -> a) -> a -> a
-applyN 0 f  v = v
+applyN 0 f v = v
 applyN n f !v = applyN (n - 1) f (f v)
 
 listToTuple :: [a] -> Maybe (a, a)
@@ -166,7 +171,7 @@ sign n | n > 0 = 1
 sign n | n < 0 = -1
 sign n = 0
 
-readWithErrorMessage :: Read a => (String -> String) -> String -> Either String a
+readWithErrorMessage :: (Read a) => (String -> String) -> String -> Either String a
 readWithErrorMessage error input = readEither input & mapLeft (const $ error input)
 
 readInt :: String -> Either String Int
@@ -175,7 +180,7 @@ readInt = readWithErrorMessage $ \input -> "expected an int but got: \"" <> inpu
 readInteger :: String -> Either String Integer
 readInteger = readWithErrorMessage $ \input -> "expected an integer but got: \"" <> input <> "\""
 
-trace :: Show a => String -> a -> a
+trace :: (Show a) => String -> a -> a
 trace label value = Trace.trace (label <> ": " <> show value) value
 
 reduceR :: (a -> a -> a) -> [a] -> Maybe a
@@ -194,8 +199,8 @@ dropEnd (x : xs) = x : dropEnd xs
 mapWithPrevious :: (b -> a -> b) -> b -> [a] -> [b]
 mapWithPrevious f previous [] = []
 mapWithPrevious f previous (x : xs) = v : mapWithPrevious f v xs
-  where
-    v = f previous x
+ where
+  v = f previous x
 
 class Unwrap f a where
   unwrap :: f a -> a
@@ -204,7 +209,7 @@ instance Unwrap Maybe a where
   unwrap (Just a) = a
   unwrap Nothing = error "tried to unwrap Nothing"
 
-instance Show e => Unwrap (Either e) a where
+instance (Show e) => Unwrap (Either e) a where
   unwrap (Right a) = a
   unwrap (Left e) = error $ "tried to unwrap a Left " <> show e
 
@@ -214,21 +219,21 @@ instance Show TransparentString where
   show (TransparentString s) = s
 
 indexed :: [a] -> [(Int, a)]
-indexed = zip [0..]
+indexed = zip [0 ..]
 
 tuplePermutations :: [a] -> [(a, a)]
 tuplePermutations items =
   indexed items >>= \(i, item1) ->
     let f (j, item2) = if i /= j && j <= i then Just (item1, item2) else Nothing
-    in mapMaybe f $ indexed items
+     in mapMaybe f $ indexed items
 
 findMap :: (a -> Maybe b) -> [a] -> Maybe b
 findMap f = safeHead . mapMaybe f
 
-forWithIndex :: Applicative m => [a] -> (Int -> a -> m b) -> m [b]
-forWithIndex xs f = for (zip [0..] xs) (uncurry f)
+forWithIndex :: (Applicative m) => [a] -> (Int -> a -> m b) -> m [b]
+forWithIndex xs f = for (zip [0 ..] xs) (uncurry f)
 
-nthTriangle :: Integral n => n -> n
+nthTriangle :: (Integral n) => n -> n
 nthTriangle n = (n * n + n) `div` 2
 
 pairs :: [a] -> [(a, a)]
@@ -239,3 +244,15 @@ pairs (x : y : xs) = (x, y) : pairs (y : xs)
 parFilter :: (a -> Bool) -> [a] -> [a]
 parFilter f = map fst . filter snd . parMap (evalTuple2 r0 rdeepseq) (\x -> (x, f x))
 
+parseGrid :: (IArray a e) => (Char -> Either String e) -> String -> Either String (a Pos e)
+parseGrid parseCell input = do
+  cells <- traverse (traverse parseCell) $ filter (not . null) $ map trimSpace $ lines input
+  let height = length cells
+  let width = length (head cells)
+  Right $ array (Pos 0 0, Pos (width - 1) (height - 1)) $ do
+    (y, row) <- zip [0 ..] cells
+    (x, cell) <- zip [0 ..] row
+    pure (Pos x y, cell)
+
+parseDigit :: Char -> Either String Int
+parseDigit c = mapLeft (\_ -> show c <> " is not a digit") $ readInt [c]
