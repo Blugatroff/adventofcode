@@ -4,8 +4,6 @@ module Util where
 
 import MeLude
 import Control.Parallel.Strategies (evalTuple2, parMap, r0, rdeepseq)
-import Data.Array.Base (IArray, array)
-import Data.Function ((&))
 import Data.Map qualified as M
 import Data.Pos (Pos (Pos))
 import Debug.Trace qualified as Trace
@@ -246,3 +244,6 @@ parseGrid parseCell input = do
 
 parseDigit :: Char -> Either String Int
 parseDigit c = mapLeft (\_ -> show c <> " is not a digit") $ readInt [c]
+
+lengthInBase :: (Integral a) => Int -> a -> Int
+lengthInBase base n = ceiling (logBase (fromIntegral base) (fromIntegral (n + 1)) :: Float)

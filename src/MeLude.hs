@@ -70,7 +70,7 @@ import Data.List.Extra as X (dropEnd, firstJust)
 import Data.List.NonEmpty as X (NonEmpty (..))
 import Data.Map as X (Map)
 import Data.Maybe as X
-import Data.Monoid as X (Monoid (..), (<>))
+import Data.Monoid as X (Monoid (..))
 import Data.Ord as X (Ord (..), Ordering (..))
 import Data.Semigroup as X (Semigroup (..))
 import Data.Set as X (Set)
@@ -88,6 +88,7 @@ import Prelude as X (
   Double,
   Enum (..),
   Float,
+  Floating,
   Integer,
   Integral (..),
   Num (..),

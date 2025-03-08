@@ -1,7 +1,7 @@
 module Year2024.Day7 (partOne, partTwo) where
 
 import MeLude
-import Util (parFilter, readInt, split, splitOnce, trimSpace)
+import Util (parFilter, readInt, split, splitOnce, trimSpace, lengthInBase)
 
 type Equation = (Int, [Int])
 
@@ -32,9 +32,7 @@ partOne :: String -> Either String String
 partOne = fmap (show . solution [(*), (+)]) . parse
 
 concatenate :: Operation
-concatenate x y = x * (10 ^ ySize) + y
- where
-  ySize :: Int = ceiling (logBase 10 (fromIntegral (y + 1)) :: Float)
+concatenate x y = x * (10 ^ lengthInBase 10 y) + y
 
 partTwo :: String -> Either String String
 partTwo = fmap (show . solution [(*), (+), concatenate]) . parse
