@@ -1,13 +1,9 @@
 module Year2022.Day14 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude hiding (range)
 import Util (readInt, split, trim, readInt, splitSeq, splitOnce)
-import Data.List (intersperse)
 import qualified Data.Map as M
 import Control.Monad.State (State, get, modify, evalState)
-import Control.Monad (forM_)
 
 type Path = [(Int, Int)]
 

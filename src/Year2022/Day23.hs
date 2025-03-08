@@ -1,12 +1,8 @@
 module Year2022.Day23 (partOne, partTwo) where
 
-import Control.Arrow ((>>>))
-import Data.Char (isSpace)
-import Data.List.Extra (firstJust)
+import MeLude
 import Data.Map qualified as M
-import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import Data.Set qualified as S
-import Data.Traversable (for)
 import Util (applyN, dedup, safeMaximum, safeMinimum, splitSeq, trim)
 import Data.Pos (Pos(..))
 

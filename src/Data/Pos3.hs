@@ -1,5 +1,7 @@
 module Data.Pos3 (Pos3(..), x, y, z, manhattan) where
 
+import MeLude
+
 data Pos3 a = Pos3 a a a
 
 instance Eq a => Eq (Pos3 a) where

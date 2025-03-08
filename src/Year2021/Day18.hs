@@ -1,12 +1,8 @@
 module Year2021.Day18 (partOne, partTwo) where
 
-import Control.Applicative ((<|>))
+import MeLude
 import Control.Monad.State (StateT, evalStateT, get, lift, put)
 import Control.Monad.State.Class (MonadState)
-import Data.Char (isDigit)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.Maybe (fromMaybe)
 import Util
   ( mapFst,
     readInt,

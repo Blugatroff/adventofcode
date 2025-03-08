@@ -1,8 +1,6 @@
 module Year2021.Day8 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.List (elemIndex, findIndex, sort)
-import GHC.List (foldl')
+import MeLude
 import Util (removeList, setList, split, trim)
 
 parseSegments :: String -> [String]

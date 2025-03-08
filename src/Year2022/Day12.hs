@@ -1,10 +1,7 @@
 module Year2022.Day12 (partOne, partTwo) where
 
-import Data.Char (isAsciiLower, isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude
 import Data.Map qualified as M
-import Data.Maybe (mapMaybe)
 import Data.Pos (Pos (..))
 import Dijkstra qualified
 import Util (safeHead, safeMinimum, split, trim)

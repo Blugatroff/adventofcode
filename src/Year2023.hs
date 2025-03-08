@@ -1,5 +1,6 @@
 module Year2023 (year) where
 
+import MeLude
 import Data.Map qualified as M
 import Day (Day (Day), Year (Year))
 import Year2023.Day5 qualified as Day5

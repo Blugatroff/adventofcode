@@ -1,12 +1,7 @@
 module Year2022.Day17 (partOne, partTwo) where
 
-import Control.Monad (replicateM_, when)
+import MeLude
 import Control.Monad.State (State, evalState, execState, get, gets, modify)
-import Data.Foldable (traverse_)
-import Data.Function ((&))
-import Data.Functor (void, ($>), (<&>))
-import Data.List (find, intercalate)
-import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Set qualified as S
 import Util (dedup, mapFst, mapSnd, safeMaximum, safeMinimum)
 import Data.Pos (Pos(..))

@@ -1,14 +1,7 @@
 module Year2024.Day6 (partOne, partTwo) where
 
-import Control.Monad (guard)
-import Control.Monad.ST.Strict (ST, runST)
-import Data.Array.IArray (Ix (..), assocs, bounds, (!), (//))
-import Data.Array.MArray (MArray (newArray), readArray, writeArray)
-import Data.Array.ST (STUArray)
-import Data.Array.Unboxed (UArray)
-import Data.Either.Extra (maybeToEither)
-import Data.Maybe (isNothing, mapMaybe)
-import Data.Word (Word8)
+import MeLude
+import Data.Array.Base as Array
 import Direction (Direction (..), turnRight)
 import Util
 import Data.Pos

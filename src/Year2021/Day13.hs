@@ -1,10 +1,6 @@
 module Year2021.Day13 (partOne, partTwo) where
 
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (foldl', isPrefixOf, nub)
-import Data.Maybe (mapMaybe)
-import Text.Read (readEither)
+import MeLude
 import Util (leftToMaybe, rightToMaybe, split)
 
 data Fold = FoldAlongX !Int | FoldAlongY !Int
@@ -59,16 +55,16 @@ foldAlongY pos = map move
     move (x, y) | y <= pos = (x, y)
     move (x, y) = (x, pos - (y - pos))
 
-fold :: Dots -> Fold -> Dots
-fold dots = \case
+foldPaper :: Dots -> Fold -> Dots
+foldPaper dots = \case
   FoldAlongX x -> foldAlongX x dots
   FoldAlongY y -> foldAlongY y dots
 
 solvePartOne :: Input -> Int
-solvePartOne input = folds input & head & fold (dots input) & nub & length
+solvePartOne input = folds input & head & foldPaper (dots input) & nub & length
 
 solvePartTwo :: Input -> String
-solvePartTwo input = foldl' fold (dots input) (folds input) & nub & showPaper
+solvePartTwo input = foldl' foldPaper (dots input) (folds input) & nub & showPaper
 
 showPaper :: Dots -> String
 showPaper dots =

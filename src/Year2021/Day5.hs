@@ -1,6 +1,6 @@
 module Year2021.Day5 (partOne, partTwo) where
 
-import Text.Read (readEither)
+import MeLude
 import Util (split, splitSeq, dedup, sign)
 
 type Point = (Int, Int)

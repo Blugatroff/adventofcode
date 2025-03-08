@@ -2,13 +2,11 @@
 
 module Year2021.Day16 (partOne, partTwo) where
 
+import MeLude
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.State (MonadState (put), State, evalState, get, gets, lift, modify)
 import Control.Monad.Trans.Except (throwE)
 import Data.Bits (shiftL, (.|.))
-import Data.Function ((&))
-import Data.Functor (($>), (<&>))
-import Data.List (foldl')
 import Util (safeHead)
 
 data Bit = Zero | One

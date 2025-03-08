@@ -1,13 +1,9 @@
 module Year2021.Day20 (partOne, partTwo) where
 
+import MeLude
 import Data.Bits (shiftL, (.|.))
-import Data.Char (isSpace)
-import Data.Either.Extra (maybeToEither)
-import Data.Functor ((<&>))
 import Data.List.Extra ((!?))
-import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import Data.Pos (Pos (..))
-import Data.Set (Set)
 import Data.Set qualified as Set
 import Util (applyN, forWithIndex, maximumOrZero, minimumOrZero, safeHead, safeTail, trim)
 

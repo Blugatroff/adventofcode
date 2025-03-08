@@ -1,5 +1,6 @@
 module Year2022.Day6 (partOne, partTwo) where
 
+import MeLude
 import Data.Function ((&))
 import qualified Data.Set as S
 

@@ -1,13 +1,8 @@
 module Year2022.Day7 (partOne, partTwo) where
 
-import Control.Arrow ((>>>))
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (foldl', sort)
+import MeLude
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe)
-import Util (dropEnd, readInt, safeHead, split, splitOnce, trim)
+import Util (readInt, safeHead, split, splitOnce, trim)
 
 data CdTarget = TargetUp | TargetRoot | TargetDown !String
   deriving (Show)
@@ -49,7 +44,7 @@ assembleFileSystem = snd . foldl' fold ([], Directory M.empty)
   where
     fold :: ([String], FileSystem) -> TerminalLine -> ([String], FileSystem)
     fold state LsLine = state
-    fold (cwd, sys) (CdLine TargetUp) = (dropEnd cwd, sys)
+    fold (cwd, sys) (CdLine TargetUp) = (init cwd, sys)
     fold (cwd, sys) (CdLine TargetRoot) = ([], sys)
     fold (cwd, sys) (CdLine (TargetDown dir)) = (cwd ++ [dir], sys)
     fold (cwd, sys) (FileLine name size) =

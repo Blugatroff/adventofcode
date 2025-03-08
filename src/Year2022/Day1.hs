@@ -1,10 +1,6 @@
 module Year2022.Day1 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (sort)
-import Data.Maybe (fromMaybe)
+import MeLude
 import Util (readInt, split, trim)
 
 parseLine :: String -> Either String (Maybe Int)

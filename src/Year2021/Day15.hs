@@ -1,10 +1,7 @@
 module Year2021.Day15 (partOne, partTwo) where
 
-import Data.Array ((!))
+import MeLude
 import Data.Array qualified as A
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
 import Dijkstra
   ( Cell (..),
     Solution (cost),
@@ -12,7 +9,6 @@ import Dijkstra
     findSolutionFrom,
   )
 import Util (readInt, split, trim)
-import Data.List (intercalate)
 import Data.Pos qualified as P
 
 data Cave = Cave

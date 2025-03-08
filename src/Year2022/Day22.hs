@@ -1,16 +1,7 @@
 module Year2022.Day22 (partOne, partTwo) where
 
-import Control.Arrow ((>>>))
-import Control.Monad (zipWithM, (>=>))
-import Data.Bifunctor (first)
-import Data.Char (isSpace)
-import Data.Either.Extra (maybeToEither)
-import Data.Functor ((<&>))
-import Data.List (intersperse)
-import Data.List.Extra (dropEnd)
+import MeLude
 import Data.Map qualified as M
-import Data.Maybe (catMaybes, fromMaybe, mapMaybe)
-import Data.Traversable (for)
 import Util (applyN, maximumByKey, maximumOrZero, minimumByKey, minimumOrZero, readInt, safeLast, safeMaximum, safeMinimum, splitSeq, trim)
 import Direction
 

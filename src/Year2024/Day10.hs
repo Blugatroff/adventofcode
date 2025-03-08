@@ -1,12 +1,10 @@
 module Year2024.Day10 (partOne, partTwo) where
 
-import Control.Monad (guard)
-import Data.Array.Base (IArray (..), UArray, (!))
 import Data.Array.Base qualified as Array
-import Data.Ix (Ix (..))
 import Data.Pos (Pos (..))
 import Data.Set qualified as Set
 import Direction (allDirections)
+import MeLude
 import Util
 
 type HeightMap = UArray Pos Int

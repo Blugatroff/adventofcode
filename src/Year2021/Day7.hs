@@ -1,6 +1,6 @@
 module Year2021.Day7 (partOne, partTwo) where
 
-import Text.Read (readEither)
+import MeLude
 import Util (split)
 
 parse :: String -> Either String [Int]

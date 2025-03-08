@@ -1,12 +1,8 @@
 module Year2021.Day22 (partOne, partTwo) where
 
-import Control.Monad ((<=<))
-import Data.Char (isSpace)
+import MeLude
 import Data.Cuboid (Cuboid (..))
 import Data.Cuboid qualified as Cuboid
-import Data.Either.Extra (maybeToEither, eitherToMaybe)
-import Data.Function ((&))
-import Data.Maybe (mapMaybe)
 import Data.Range (Range (..))
 import Data.Range qualified as Range
 import Util (readInteger, split, splitOnce, splitSeqOnce, trim)

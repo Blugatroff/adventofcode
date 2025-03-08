@@ -1,8 +1,6 @@
 module Year2022.Day4 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude
 import Util (readInt, split, splitOnce, trim)
 import Data.Range (Range(..))
 

@@ -1,16 +1,10 @@
 module Year2021.Day21 (partOne, partTwo) where
 
-import Control.Arrow ((>>>))
-import Control.Monad (forever, when, (>=>))
+import MeLude
 import Control.Monad.Except (MonadError (throwError), runExceptT)
 import Control.Monad.State (MonadState)
 import Control.Monad.State.Lazy (State, evalState, get, gets, modify)
-import Data.Char (isSpace)
-import Data.Either.Extra (maybeToEither)
-import Data.Map.Lazy (Map)
 import Data.Map.Lazy qualified as Map
-import Data.Traversable (for)
-import Data.Void (absurd)
 import Util (dedup, maximumOrZero, readInt, splitOnce, trim)
 
 parse :: String -> Either String (Int, Int)

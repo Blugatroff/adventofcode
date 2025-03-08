@@ -1,15 +1,9 @@
 module Year2024.Day8 (partOne, partTwo) where
 
-import Control.Monad (guard, unless)
-import Data.Bifunctor (second)
-import Data.Ix (Ix (..))
-import Data.List (singleton)
-import Data.Map.Strict (Map)
+import MeLude
 import Data.Map.Strict qualified as Map
 import Data.Pos (Pos (..), divPos)
-import Data.Set (Set)
 import Data.Set qualified as Set
-import Data.Tuple (swap)
 import Util (trimSpace, tuplePermutations)
 
 type Bounds = (Pos, Pos)

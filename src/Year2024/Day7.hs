@@ -1,6 +1,6 @@
 module Year2024.Day7 (partOne, partTwo) where
 
-import Data.Either.Extra (maybeToEither)
+import MeLude
 import Util (parFilter, readInt, split, splitOnce, trimSpace)
 
 type Equation = (Int, [Int])

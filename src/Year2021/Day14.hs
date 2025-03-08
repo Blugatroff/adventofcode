@@ -1,13 +1,8 @@
 module Year2021.Day14 (partOne, partTwo) where
 
-import Control.Monad (forM_)
+import MeLude
 import Control.Monad.State (State, execState, get, modify)
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (find, foldl', sort)
 import Data.Map qualified as M
-import Data.Maybe (fromMaybe, mapMaybe)
 import Util
   ( applyN,
     dedup,

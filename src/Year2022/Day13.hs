@@ -1,10 +1,6 @@
 module Year2022.Day13 (partOne, partTwo) where
 
-import Data.Char (isDigit, isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (elemIndex, sort)
-import Data.Maybe (catMaybes)
+import MeLude
 import Util (chunks, readInt, split, trim)
 
 data Element = Number !Int | List ![Element]

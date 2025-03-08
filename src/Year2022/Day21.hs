@@ -1,10 +1,6 @@
 module Year2022.Day21 (partOne, partTwo) where
 
-import Data.Either.Extra (maybeToEither)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List.Extra (firstJust)
-import Data.Map (Map)
+import MeLude
 import Data.Map qualified as M
 import Data.Map qualified as Map
 import Util (splitOnce, trimSpace, readInteger)

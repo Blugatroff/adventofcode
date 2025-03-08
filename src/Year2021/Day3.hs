@@ -1,6 +1,6 @@
 module Year2021.Day3 (partOne, partTwo) where
 
-import Data.List (transpose)
+import MeLude
 import Util
 
 parseLine :: String -> [Bool]

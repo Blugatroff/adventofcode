@@ -1,8 +1,6 @@
 module Year2022.Day20 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Maybe (fromMaybe)
+import MeLude
 import Data.Sequence (Seq)
 import Data.Sequence qualified as Seq
 import Util (applyN, indexed, readInteger, split, trim)

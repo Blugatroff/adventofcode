@@ -1,16 +1,9 @@
 module Year2021.Day23 (partOne, partTwo) where
 
-import Control.Monad ((<=<))
-import Data.Char (isAlpha)
-import Data.Either.Extra (maybeToEither)
-import Data.Function (on)
+import MeLude
 import Data.Heap qualified as Heap
-import Data.List (sortBy, transpose, foldl')
-import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
-import Data.Traversable (for)
 import Util (safeHead)
-import Data.Foldable (fold)
 
 data Amphipod = A | B | C | D deriving (Eq, Ord)
 

@@ -1,11 +1,7 @@
 module Year2022.Day10 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (foldl', intercalate)
+import MeLude
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe)
 import Util (modifyList, readInt, split, splitOnce, trim)
 
 data Instruction = AddX !Int | NoOp

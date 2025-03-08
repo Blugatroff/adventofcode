@@ -1,8 +1,6 @@
 module Year2022.Day3 (partOne, partTwo) where
 
-import Data.Char (isAsciiLower, isAsciiUpper, isSpace, ord)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude
 import qualified Data.Set as S
 import Util (chunks, reduceR, split, trim)
 

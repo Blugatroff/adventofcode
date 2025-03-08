@@ -1,6 +1,6 @@
 module Data.Range (Range(..), new, newOrdered, start, end, inRange, size, contains, intersects, intersection, tryMerge, tryMergeAll, points) where
-import Data.List (sortBy)
-import Data.Function (on)
+
+import MeLude hiding (inRange)
 
 -- inclusive start and end
 data Range a = Range a a deriving (Eq, Ord)

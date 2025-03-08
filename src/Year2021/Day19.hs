@@ -1,13 +1,9 @@
 module Year2021.Day19 (partOne, partTwo) where
 
+import MeLude
 import Control.Monad.State (State)
 import Control.Monad.State qualified as State
-import Data.Char (isNumber, isSpace)
-import Data.Either.Extra (mapLeft, maybeToEither)
-import Data.Functor ((<&>))
-import Data.Maybe (catMaybes)
 import Data.Pos3
-import Data.Traversable (for)
 import Util (applyN, dedup, findMap, readInt, safeHead, safeMaximum, safeTail, split, splitSeq, trim, tuplePermutations)
 
 data Scanner = Scanner {id :: Int, beacons :: [Pos3 Int]}
@@ -16,7 +12,7 @@ parseScanner :: String -> Either String Scanner
 parseScanner str = do
   let ls = filter (not . null) $ map (trim isSpace) $ lines str
   header <- maybeToEither ("failed to parse scanner: " <> str) $ safeHead ls
-  let digits = filter isNumber header
+  let digits = filter isDigit header
   let error = "failed to parse scanner id of scanner: " <> str
   id <- mapLeft (const error) $ readInt digits
 

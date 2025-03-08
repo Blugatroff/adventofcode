@@ -1,10 +1,6 @@
 module Year2022.Day9 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (foldl')
-import Data.List.NonEmpty (NonEmpty ((:|)))
+import MeLude
 import qualified Data.List.NonEmpty as NE
 import Util (dedup, mapFst, mapSnd, mapWithPrevious, readInt, sign, split, splitOnce, trim)
 

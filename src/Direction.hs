@@ -1,5 +1,6 @@
 module Direction (Direction (..), allDirections, directionAxis, turnLeft, turnRight) where
 
+import MeLude
 import Data.Array (Ix)
 import GHC.Records (HasField (..))
 

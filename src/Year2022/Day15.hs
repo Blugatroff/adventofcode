@@ -1,9 +1,6 @@
 module Year2022.Day15 (partOne, partTwo) where
 
-import Data.Char (isDigit, isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.Maybe (mapMaybe)
+import MeLude
 import Util (TransparentString (..), readInt, split, splitOnce, trim)
 import Data.Range qualified as Range
 import Data.Range (Range(..))

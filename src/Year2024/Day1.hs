@@ -1,6 +1,6 @@
 module Year2024.Day1 (partOne, partTwo) where
 
-import Data.List (sort)
+import MeLude
 import Util
 
 parse :: String -> Either String [(Int, Int)]

@@ -1,10 +1,8 @@
 module Year2022.Day19 (partOne, partTwo) where
 
+import MeLude
 import Control.Parallel.Strategies
-import Data.Char (isSpace)
 import Data.Heap qualified as Heap
-import Data.List (foldl')
-import Data.Maybe (mapMaybe)
 import Data.Set qualified as S
 import Util (nthTriangle, readInt, rightToMaybe, split, trim)
 

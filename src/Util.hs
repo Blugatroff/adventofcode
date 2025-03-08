@@ -2,18 +2,13 @@
 
 module Util where
 
+import MeLude
 import Control.Parallel.Strategies (evalTuple2, parMap, r0, rdeepseq)
 import Data.Array.Base (IArray, array)
-import Data.Char (isSpace)
-import Data.Either.Combinators (mapLeft)
 import Data.Function ((&))
-import Data.List (dropWhileEnd, foldl', isPrefixOf, maximumBy, minimumBy)
 import Data.Map qualified as M
-import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Pos (Pos (Pos))
-import Data.Traversable (for)
 import Debug.Trace qualified as Trace
-import Text.Read (readEither)
 
 split :: (Eq a) => a -> [a] -> [[a]]
 split del [] = []
@@ -190,11 +185,6 @@ reduceR fold (first : rest) = Just $ foldr fold first rest
 reduceL :: (a -> a -> a) -> [a] -> Maybe a
 reduceL fold [] = Nothing
 reduceL fold (first : rest) = Just $ foldl' fold first rest
-
-dropEnd :: [a] -> [a]
-dropEnd [] = []
-dropEnd [x] = []
-dropEnd (x : xs) = x : dropEnd xs
 
 mapWithPrevious :: (b -> a -> b) -> b -> [a] -> [b]
 mapWithPrevious f previous [] = []

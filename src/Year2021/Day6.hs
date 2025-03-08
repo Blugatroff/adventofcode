@@ -1,8 +1,7 @@
 module Year2021.Day6 (partOne, partTwo) where
 
+import MeLude
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe)
-import Text.Read (readEither)
 import Util
 
 parse :: String -> Either String [Int]

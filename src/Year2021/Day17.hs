@@ -1,13 +1,7 @@
 module Year2021.Day17 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Either.Combinators (mapLeft)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.Maybe (catMaybes, fromMaybe)
-import Text.Read (readEither)
+import MeLude
 import Util (safeMaximum, maximumByKey, maybeToRight, sign, splitOnce, splitSeqOnce, trim)
-import Prelude hiding (maximum)
 import Data.Pos (Pos(..))
 
 data Target = Target {minX :: !Int, maxX :: !Int, minY :: !Int, maxY :: !Int}
@@ -17,8 +11,8 @@ parseRange :: String -> Either String (Int, Int)
 parseRange range = case splitSeqOnce ".." (drop 1 $ dropWhile (/= '=') range) of
   Nothing -> Left $ "failed to parse range: " <> range
   Just (min, max) -> do
-    min <- readEither min & mapLeft (const $ "failed to parse min: " <> min <> " of range: " <> range)
-    max <- readEither max & mapLeft (const $ "failed to parse max: " <> max <> " of range: " <> range)
+    min <- readEither min & first (const $ "failed to parse min: " <> min <> " of range: " <> range)
+    max <- readEither max & first (const $ "failed to parse max: " <> max <> " of range: " <> range)
     return (min, max)
 
 parse :: String -> Either String Target

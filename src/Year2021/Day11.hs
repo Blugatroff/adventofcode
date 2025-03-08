@@ -1,7 +1,6 @@
 module Year2021.Day11 (partOne, partTwo) where
 
-import Data.Function ((&))
-import Text.Read (readEither)
+import MeLude
 import Util (mapSnd, split)
 
 type Grid = [[Int]]

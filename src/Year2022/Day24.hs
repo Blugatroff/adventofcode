@@ -1,15 +1,8 @@
 module Year2022.Day24 (partOne, partTwo) where
 
-import Control.Arrow ((>>>))
-import Data.Char (isSpace)
-import Data.Either.Extra (maybeToEither)
-import Data.Foldable (find)
-import Data.Functor ((<&>))
-import Data.List (singleton)
+import MeLude
 import Data.Map qualified as M
-import Data.Maybe (catMaybes, mapMaybe)
 import Data.Pos (Pos (..))
-import Data.Traversable (for)
 import Dijkstra qualified
 import Direction
 import Util (safeHead, safeLast, split, trim)

@@ -1,13 +1,7 @@
 module Year2022.Day16 (partOne, partTwo) where
 
-import Control.Monad (when)
-import Data.Char (isDigit, isSpace, isUpper)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.Map (Map)
+import MeLude
 import Data.Map qualified as M
-import Data.Maybe (fromMaybe, maybeToList, mapMaybe)
-import Data.Set (Set)
 import Data.Set qualified as S
 import Util (readInt, safeMaximum, split, trim, tuplePermutations)
 

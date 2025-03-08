@@ -1,9 +1,10 @@
 module Data.Cuboid (Cuboid(..), intersects, intersection, contains, containsPoint, points, volume) where
 
+import MeLude
+
 import Data.Pos3 (Pos3(..))
 import Data.Range qualified as Range
 import Data.Range (Range)
-import Data.Functor ((<&>))
 
 data Cuboid a = Cuboid (Range a) (Range a) (Range a)
 

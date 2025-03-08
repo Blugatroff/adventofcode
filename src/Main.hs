@@ -1,11 +1,8 @@
 module Main (main) where
 
+import MeLude
 import Configuration.Dotenv qualified as Dotenv
 import Control.Exception
-import Control.Monad (forM, forM_, void)
-import Data.Char (isSpace)
-import Data.Functor ((<&>))
-import Data.List (find, sort)
 import Data.Map qualified as M
 import Data.Text qualified as Text
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
@@ -15,7 +12,6 @@ import Network.HTTP.Types qualified as HTTPTypes
 import System.Directory (createDirectoryIfMissing)
 import System.Environment (getArgs, lookupEnv)
 import System.Exit (exitFailure)
-import System.IO (hPrint, hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
 
 import Control.Parallel.Strategies

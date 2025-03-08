@@ -1,4 +1,6 @@
 module Year2024.Day2 (partOne, partTwo) where
+
+import MeLude
 import Util
 
 parse :: String -> Either String [[Int]]

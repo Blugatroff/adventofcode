@@ -1,6 +1,6 @@
 module Data.Pos (Pos(..), divPos) where
 
-import Data.Ix (Ix)
+import MeLude
 
 data Pos = Pos {x :: Int, y :: Int}
   deriving (Eq, Ix)

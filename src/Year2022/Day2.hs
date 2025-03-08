@@ -1,10 +1,7 @@
 module Year2022.Day2 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe)
 import Util (split, splitOnce, trim)
 
 data Shape = Rock | Paper | Scissor

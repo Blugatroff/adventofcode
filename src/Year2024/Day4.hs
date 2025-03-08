@@ -1,13 +1,7 @@
 module Year2024.Day4 (partOne, partTwo) where
 
-import Control.Monad (guard)
-import Data.Array.IArray (IArray, Ix (..), array, bounds, (!))
-import Data.Array.Unboxed (UArray)
-import Data.Foldable (fold)
-import Data.Functor ((<&>))
-import Data.Maybe (fromMaybe)
+import MeLude
 import Data.Pos
-import Data.Traversable (for)
 import Util
 
 parse :: String -> UArray Pos Char

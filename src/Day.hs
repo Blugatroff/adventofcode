@@ -5,6 +5,7 @@ module Day
   )
 where
 
+import MeLude
 import Data.Map qualified as M
 
 type Part = String -> Either String String

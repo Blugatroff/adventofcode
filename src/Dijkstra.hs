@@ -7,12 +7,10 @@ module Dijkstra
   )
 where
 
-import Data.Functor ((<&>))
+import MeLude
 import Data.Heap qualified as Heap
 import Data.Kind (Type)
-import Data.Maybe (mapMaybe)
 import Data.Set qualified as Set
-import Data.List (foldl')
 
 class (Ord (Pos world)) => World world where
   type Pos world :: Type

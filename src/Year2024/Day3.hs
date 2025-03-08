@@ -1,9 +1,6 @@
 module Year2024.Day3 (partOne, partTwo) where
 
-import Control.Monad (when)
-import Data.Char (isDigit)
-import Data.Either.Extra (eitherToMaybe)
-import Data.Maybe (fromMaybe, mapMaybe)
+import MeLude
 import Util
 
 data Instr = Do | Dont | Mul Int Int

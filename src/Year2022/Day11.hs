@@ -1,11 +1,7 @@
 module Year2022.Day11 (partOne, partTwo) where
 
+import MeLude
 import Control.Monad.State (MonadState (get), State, execState, modify)
-import Data.Char (isDigit, isSpace)
-import Data.Foldable (forM_)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (sort)
 import Util (modifyList, readInt, split, splitOnce, splitSeq, trace, trim)
 
 data OperationArgument = OldValue | Number !Int deriving (Show)

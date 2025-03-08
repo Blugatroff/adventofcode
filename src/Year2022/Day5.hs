@@ -1,9 +1,6 @@
 module Year2022.Day5 (partOne, partTwo) where
 
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.List (foldl', transpose)
+import MeLude
 import qualified Data.Map.Strict as M
 import Util (readInt, replace, split, splitOnce, trim)
 

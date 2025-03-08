@@ -1,11 +1,7 @@
 module Year2022.Day18 (partOne, partTwo) where
 
-import Control.Monad (foldM)
-import Data.Char (isSpace)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude
 import Data.Map qualified as M
-import Data.Maybe (fromMaybe, isNothing)
 import Data.Set qualified as S
 import Util (dedup, readInt, split, trim)
 

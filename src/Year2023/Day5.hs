@@ -1,9 +1,6 @@
 module Year2023.Day5 (partOne, partTwo) where
 
-import Data.List (foldl')
-
-import Data.Foldable (fold)
-import Data.Maybe (fromMaybe)
+import MeLude hiding (Map)
 import Util
 
 data Mapping = Mapping {dst :: Int, src :: Int, len :: Int} deriving (Show)

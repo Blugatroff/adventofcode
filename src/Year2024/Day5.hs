@@ -1,9 +1,6 @@
 module Year2024.Day5 (partOne, partTwo) where
 
-import Data.Either.Extra (maybeToEither)
-import Data.Function ((&))
-import Data.Functor ((<&>))
-import Data.Maybe (mapMaybe)
+import MeLude
 import Util
 
 type Rules = [(Int, Int)]

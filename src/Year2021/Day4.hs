@@ -1,7 +1,6 @@
 module Year2021.Day4 (partOne, partTwo) where
 
-import Data.List (find, intercalate, intersperse, transpose)
-import Text.Read (readEither)
+import MeLude
 import Util (split, lpad, replace, trim)
 
 data Slot = Slot !Bool !Int

@@ -1,11 +1,8 @@
 module Year2021.Day9 (partOne, partTwo) where
 
-import Data.Function ((&))
+import MeLude
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe)
-import Text.Read (readEither)
 import Util (split)
-import Data.List (sort, foldl')
 
 parse :: String -> Either String [[Int]]
 parse input =

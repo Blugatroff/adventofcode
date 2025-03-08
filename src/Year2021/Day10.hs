@@ -1,9 +1,6 @@
 module Year2021.Day10 (partOne, partTwo) where
 
-import Data.Foldable (find)
-import Data.Function ((&))
-import Data.List (sort)
-import Data.Maybe (fromMaybe, mapMaybe)
+import MeLude
 import Util (split)
 
 parse :: String -> [[Char]]

@@ -1,10 +1,7 @@
 module Year2021.Day12 (partOne, partTwo) where
 
-import Data.Char (isUpper)
-import Data.Function ((&))
-import Data.Functor ((<&>))
+import MeLude
 import qualified Data.Map as M
-import Data.Maybe (mapMaybe)
 import Util (split)
 
 data Node = Small !String | Big !String

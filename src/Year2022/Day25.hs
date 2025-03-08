@@ -1,6 +1,7 @@
 module Year2022.Day25 (partOne, partTwo) where
+
+import MeLude
 import Util (split)
-import Data.Traversable (for)
 
 data SnafuDigit = Two | One | Zero | Minus | DoubleMinus
 
