@@ -1,9 +1,23 @@
-module Data.Pos (Pos(..), divPos) where
+module Data.Pos (Pos (..), divPos) where
 
 import MeLude
 
+import Foreign.Ptr (castPtr)
+import Foreign.Storable
+
 data Pos = Pos {x :: Int, y :: Int}
   deriving (Eq, Ix)
+
+instance Storable Pos where
+  sizeOf _ = sizeOf (undefined :: Pos).x + sizeOf (undefined :: Pos).y
+  alignment = sizeOf
+  peek posPtr = do
+    let ptr = castPtr posPtr
+    Pos <$> peekElemOff ptr 0 <*> peekElemOff ptr 1
+  poke posPtr (Pos x y) = do
+    let ptr = castPtr posPtr
+    pokeElemOff ptr 0 x
+    pokeElemOff ptr 1 y
 
 instance Show Pos where
   show (Pos x y) = show (x, y)
@@ -21,4 +35,3 @@ instance Num Pos where
 
 divPos :: Pos -> Int -> Pos
 divPos (Pos x y) d = Pos (x `div` d) (y `div` d)
-

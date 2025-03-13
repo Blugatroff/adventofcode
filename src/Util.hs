@@ -2,11 +2,12 @@
 
 module Util where
 
-import MeLude
+import Control.Monad.Extra (mconcatMapM)
 import Control.Parallel.Strategies (evalTuple2, parMap, r0, rdeepseq)
 import Data.Map qualified as M
 import Data.Pos (Pos (Pos))
 import Debug.Trace qualified as Trace
+import MeLude
 
 split :: (Eq a) => a -> [a] -> [[a]]
 split del [] = []
@@ -247,3 +248,12 @@ parseDigit c = mapLeft (\_ -> show c <> " is not a digit") $ readInt [c]
 
 lengthInBase :: (Integral a) => Int -> a -> Int
 lengthInBase base n = ceiling (logBase (fromIntegral base) (fromIntegral (n + 1)) :: Float)
+
+whenMonoid :: (Monad m) => (Monoid a) => Bool -> m a -> m a
+whenMonoid cond m = if cond then m else pure mempty
+
+whenMonoidM :: (Monad m) => (Monoid a) => m Bool -> m a -> m a
+whenMonoidM cond m = cond >>= \cond -> whenMonoid cond m
+
+mconcatForM :: (Monoid b) => (Monad m) => [a] -> (a -> m b) -> m b
+mconcatForM = flip mconcatMapM
