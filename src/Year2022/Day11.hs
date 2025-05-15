@@ -2,7 +2,8 @@ module Year2022.Day11 (partOne, partTwo) where
 
 import MeLude
 import Control.Monad.State (MonadState (get), State, execState, modify)
-import Util (modifyList, readInt, split, splitOnce, splitSeq, trace, trim)
+import Util (modifyList, readInt, split, splitOnce, splitSeq, trim)
+import Data.Ord (comparing, Down (Down))
 
 data OperationArgument = OldValue | Number !Int deriving (Show)
 
@@ -100,8 +101,7 @@ solvePartOne :: [Monkey] -> Int
 solvePartOne monkeys =
   execState (repeateState 20 (playRound (`div` 3))) monkeys
     <&> inspectionCount
-    & sort
-    & reverse
+    & sortBy (comparing Down)
     & take 2
     & product
 
@@ -109,15 +109,14 @@ solvePartTwo :: [Monkey] -> Int
 solvePartTwo monkeys =
   execState (repeateState 10000 (playRound (`mod` modBase))) monkeys
     <&> inspectionCount
-    & sort
-    & reverse
+    & sortBy (comparing Down)
     & take 2
     & product
   where
-    modBase = monkeys <&> test & product & trace "modBase"
+    modBase = monkeys <&> test & product
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = parse input <&> (solvePartOne >>> show)
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = parse input <&> (solvePartTwo >>> show)

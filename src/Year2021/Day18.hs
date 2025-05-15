@@ -2,7 +2,6 @@ module Year2021.Day18 (partOne, partTwo) where
 
 import MeLude
 import Control.Monad.State (StateT, evalStateT, get, lift, put)
-import Control.Monad.State.Class (MonadState)
 import Util
   ( mapFst,
     readInt,
@@ -122,15 +121,11 @@ explode location element = case explodingPair of
 
     addRightValue :: Int -> Element -> Element
     addRightValue value element =
-      firstRight
-        <&> (\firstRight -> replaceElement firstRight (add value) element & fst)
-        & fromMaybe element
+      maybe element (\firstRight -> replaceElement firstRight (add value) element & fst) firstRight
 
     addLeftValue :: Int -> Element -> Element
     addLeftValue value element =
-      firstLeft
-        <&> (\firstLeft -> replaceElement firstLeft (add value) element & fst)
-        & fromMaybe element
+      maybe element (\firstLeft -> replaceElement firstLeft (add value) element & fst) firstLeft
 
     firstLeft = firstNumberToTheLeft location element
     firstRight = firstNumberToTheRight location element
@@ -229,7 +224,7 @@ solvePartTwo elements =
     & fromMaybe 0
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = parse input <&> (solvePartOne >>> show)
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = parse input <&> (solvePartTwo >>> show)

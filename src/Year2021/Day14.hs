@@ -1,7 +1,7 @@
 module Year2021.Day14 (partOne, partTwo) where
 
 import MeLude
-import Control.Monad.State (State, execState, get, modify)
+import Control.Monad.State (State, execState, gets, modify)
 import Data.Map qualified as M
 import Util
   ( applyN,
@@ -26,7 +26,7 @@ data Input = Input
   deriving (Show)
 
 parseRule :: String -> Either String Rule
-parseRule line = case splitSeq "->" line <&> trim isSpace & concat of
+parseRule line = case concatMap (trim isSpace) (splitSeq "->" line) of
   [left, right, between] -> Right (left, right, between)
   splits -> Left $ "failed to parse line: " <> line
 
@@ -70,7 +70,7 @@ type Pairs = M.Map Pair Int
 type Letters = M.Map Char Int
 
 getPairs :: String -> Pairs
-getPairs = windows 2 <&> mapMaybe listToTuple <&> dedup <&> M.fromList
+getPairs = windows 2 <&> (mapMaybe listToTuple >>> dedup >>> M.fromList)
 
 applyRule :: Rule -> Pairs -> State (Pairs, Letters) ()
 applyRule (left, right, between) pairs = case M.lookup key pairs of
@@ -86,7 +86,7 @@ applyRule (left, right, between) pairs = case M.lookup key pairs of
 
 applyRulespartTwo :: [Rule] -> State (Pairs, Letters) ()
 applyRulespartTwo rules = do
-  oldPairs <- get <&> fst
+  oldPairs <- gets fst
   forM_ rules $ \rule -> do
     applyRule rule oldPairs
     return ()
@@ -110,4 +110,4 @@ partOne :: String -> Either String String
 partOne input = parse input >>= solvePartOne 10 <&> show
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo 40 <&> show
+partTwo input = parse input <&> (solvePartTwo 40 >>> show)

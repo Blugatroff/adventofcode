@@ -3,6 +3,7 @@ module Year2024.Day12 (partOne, partTwo) where
 import MeLude
 import Util
 
+import Control.Monad.Extra (unlessM)
 import Control.Monad.State (State, evalState, gets, modify')
 import Data.Array.Base qualified as Array
 import Data.Monoid (Sum (Sum), getSum)
@@ -38,10 +39,11 @@ findRegions garden = runST $ do
 
 sides :: Region -> Int
 sides region = flip evalState Set.empty $ do
+  let mark pos side = modify' $ Set.insert (pos, side)
+  let marked pos side = gets $ Set.member (pos, side)
   let flood :: Pos -> Direction -> State (Set (Pos, Direction)) ()
       flood pos side = do
-        modify' $ Set.insert (pos, side)
-
+        mark pos side
         let neighbours :: [Pos]
             neighbours = do
               dir <- case side of
@@ -57,12 +59,12 @@ sides region = flip evalState Set.empty $ do
             visitNeighbour :: Pos -> State (Set (Pos, Direction)) ()
             visitNeighbour neighbour = do
               alreadyFlooded <- gets $ Set.member (neighbour, side)
-              unless alreadyFlooded $ flood neighbour side
+              unlessM (marked neighbour side) $ flood neighbour side
         for_ neighbours visitNeighbour
 
   fmap getSum $ mconcatForM (Set.elems region) $ \pos -> do
     mconcatForM allDirections $ \side -> do
-      alreadyCounted <- gets $ Set.member (pos, side)
+      alreadyCounted <- marked pos side
       let sideIsExposed = not $ Set.member (pos + Pos side.x side.y) region
       whenMonoid (not alreadyCounted && sideIsExposed) $ do
         flood pos side
@@ -78,18 +80,14 @@ perimeter region = length $ do
 area :: Region -> Int
 area = Set.size
 
-partOne :: String -> Either String String
-partOne input = do
+solution :: (Region -> Int) -> String -> Either String String
+solution prize input = do
   garden <- parse input
   let regions = findRegions garden
-  Right $ show $ sum $ do
-    region <- regions
-    pure $ perimeter region * area region
+  Right $ show $ sum $ prize <$> regions
+
+partOne :: String -> Either String String
+partOne = solution $ \r -> perimeter r * area r
 
 partTwo :: String -> Either String String
-partTwo input = do
-  garden <- parse input
-  let regions = findRegions garden
-  Right $ show $ sum $ do
-    region <- regions
-    pure $ sides region * area region
+partTwo = solution $ \r -> sides r * area r

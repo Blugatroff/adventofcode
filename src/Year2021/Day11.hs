@@ -52,7 +52,7 @@ step grid = f (increment grid)
     fold (x, y) (grid, flashed) = (flash grid x y, flashed + 1)
 
 solvePartOne :: Grid -> Int
-solvePartOne grid = snd $ head $ drop 100 $ iterate runStep (grid, 0)
+solvePartOne grid = snd $ (!! 100) $ iterate runStep (grid, 0)
   where
     runStep (grid, flashes) = step grid & mapSnd (+ flashes)
 

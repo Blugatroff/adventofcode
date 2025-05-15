@@ -21,9 +21,7 @@ nodeName (Small name) = name
 nodeName (Big name) = name
 
 node :: String -> Node
-node str = case any isUpper str of
-  True -> Big str
-  False -> Small str
+node str = if any isUpper str then Big str else Small str
 
 parseLine :: String -> Either String Link
 parseLine input = case map node $ split '-' input of
@@ -62,7 +60,7 @@ buildPathTree visited from to cave = do
       Nothing -> Left $ "failed to find node " <> nodeName node
     launchNext neighbour = buildPathTree (from : visited) neighbour to cave <&> (nodeName neighbour,)
     filterNeighbours :: [Node] -> [Node]
-    filterNeighbours neighbours = filter canBeVisitedAgain neighbours
+    filterNeighbours = filter canBeVisitedAgain
       where
         canBeVisitedAgain :: Node -> Bool
         canBeVisitedAgain (Big _) = True
@@ -102,10 +100,10 @@ pathTreeToList (Branches branches) =
     >>= (\(name, subTree) -> pathTreeToList subTree <&> (name :))
 
 solvePartOne :: [Link] -> Either String Int
-solvePartOne links = pathTree (buildCave links) <&> pathTreeToList <&> length
+solvePartOne links = pathTree (buildCave links) <&> (pathTreeToList >>> length)
 
 solvePartTwo :: [Link] -> Either String Int
-solvePartTwo links = pathTreePartTwo (buildCave links) <&> pathTreeToList <&> length
+solvePartTwo links = pathTreePartTwo (buildCave links) <&> (pathTreeToList >>> length)
 
 partOne :: String -> Either String String
 partOne input = parse input >>= solvePartOne <&> show

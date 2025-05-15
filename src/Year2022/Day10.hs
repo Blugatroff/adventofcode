@@ -15,7 +15,7 @@ parseLine line = case splitOnce ' ' line of
   Just (instruction, argument) -> Left $ "unknown instruction: " <> instruction
 
 parse :: String -> Either String [Instruction]
-parse input = split '\n' input <&> trim isSpace & traverse parseLine
+parse = split '\n' >>> traverse (parseLine . trim isSpace)
 
 type DelayedOperation = Cpu -> Cpu
 
@@ -107,14 +107,14 @@ drawCrt crt =
 solvePartTwo :: [Instruction] -> String
 solvePartTwo instructions = runCpu sample M.empty (cpuStartState instructions) & drawCrt
   where
-    sample cpu crt = M.insert (x, y) value crt
+    sample cpu = M.insert (x, y) value
       where
         x = (cycleNumber cpu - 1) `mod` crtWidth
         y = (cycleNumber cpu - 1) `div` crtWidth
         value = x >= xRegister cpu - 1 && x <= xRegister cpu + 1
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = parse input <&> (solvePartOne >>> show)
 
 partTwo :: String -> Either String String
 partTwo input = parse input <&> solvePartTwo

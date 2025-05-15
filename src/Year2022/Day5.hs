@@ -7,14 +7,11 @@ import Util (readInt, replace, split, splitOnce, trim)
 transposeStacks :: [String] -> [String]
 transposeStacks input =
   transpose input
-    <&> reverse
-    <&> filter (/= ']')
-    <&> filter (/= '[')
-    <&> trim isSpace
+    <&> (reverse >>> filter (/= ']') >>> filter (/= '[') >>> trim isSpace)
     & filter (not . null)
 
 parseStacks :: [String] -> [Stack]
-parseStacks lines = lines <&> drop 1 <&> reverse
+parseStacks lines = reverse . drop 1 <$> lines
 
 parseMove :: String -> Either String Move
 parseMove line =

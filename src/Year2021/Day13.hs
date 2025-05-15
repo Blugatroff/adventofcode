@@ -68,11 +68,10 @@ solvePartTwo input = foldl' foldPaper (dots input) (folds input) & nub & showPap
 
 showPaper :: Dots -> String
 showPaper dots =
-  concatMap (<> "\n") $
-    [0 .. height]
-      <&> \y ->
-        [0 .. width]
-          <&> \x -> if (x, y) `elem` dots then '#' else '.'
+  concatMap (<> "\n") $ do
+    [0 .. height] <&> \y ->
+        [0 .. width] <&> \x ->
+          if (x, y) `elem` dots then '#' else '.'
   where
     (width, height) = measurePaper dots
 
@@ -80,7 +79,7 @@ measurePaper :: Dots -> PaperSize
 measurePaper dots = (maximum $ map fst dots, maximum $ map snd dots)
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = parse input <&> (solvePartOne >>> show)
 
 partTwo :: String -> Either String String
 partTwo input = parse input <&> solvePartTwo

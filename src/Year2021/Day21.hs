@@ -2,7 +2,6 @@ module Year2021.Day21 (partOne, partTwo) where
 
 import MeLude
 import Control.Monad.Except (MonadError (throwError), runExceptT)
-import Control.Monad.State (MonadState)
 import Control.Monad.State.Lazy (State, evalState, get, gets, modify)
 import Data.Map.Lazy qualified as Map
 import Util (dedup, maximumOrZero, readInt, splitOnce, trim)

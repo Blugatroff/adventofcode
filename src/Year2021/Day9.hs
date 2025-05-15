@@ -3,6 +3,7 @@ module Year2021.Day9 (partOne, partTwo) where
 import MeLude
 import qualified Data.Map as M
 import Util (split)
+import Data.Ord (comparing, Down (Down))
 
 parse :: String -> Either String [[Int]]
 parse input =
@@ -48,8 +49,7 @@ solvePartTwo grid =
     )
     & M.toList
     & map snd
-    & sort
-    & reverse
+    & sortBy (comparing Down)
     & take 3
     & product
   where

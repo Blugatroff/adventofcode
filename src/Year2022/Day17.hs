@@ -84,7 +84,7 @@ spawnShape pos (Shape _ blocks) =
     & traverse_ (modify . modifyStateChamber . modifyChamber . S.insert)
 
 collisionWith :: Pos -> Shape -> Chamber -> Bool
-collisionWith pos (Shape _ shape) (Chamber blocks) = S.elems shape <&> (+ pos) & any colliding
+collisionWith pos (Shape _ shape) (Chamber blocks) = S.elems shape & any (colliding . (+ pos))
   where
     colliding pos@(Pos {x, y}) = x < 0 || x > 6 || y < 0 || S.member pos blocks
 

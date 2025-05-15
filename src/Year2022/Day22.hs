@@ -47,7 +47,7 @@ parsePath =
     . (splitKeepDelim "R" >=> splitKeepDelim "L")
 
 splitKeepDelim :: String -> String -> [String]
-splitKeepDelim pattern = intersperse pattern . splitSeq pattern
+splitKeepDelim pat = intersperse pat . splitSeq pat
 
 parseInstruction :: String -> Either String Instruction
 parseInstruction "L" = Right TurnLeft

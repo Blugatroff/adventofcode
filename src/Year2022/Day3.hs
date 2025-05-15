@@ -31,17 +31,14 @@ priority c
   | otherwise = 0
 
 solvePartOne :: [(String, String)] -> Int
-solvePartOne rucksacks =
-  rucksacks
-    <&> (\(a, b) -> [a, b])
-    <&> findIntersection & concat
-    <&> priority & sum
+solvePartOne rucksacks = sum $ do
+  (a, b) <- rucksacks
+  priority <$> findIntersection [a, b]
 
 solvePartTwo :: [[String]] -> Int
-solvePartTwo rucksacks =
-  rucksacks
-    <&> findIntersection & concat
-    <&> priority & sum
+solvePartTwo rucksacks = sum $ do
+  rucksack <- rucksacks
+  priority <$> findIntersection rucksack
 
 partOne :: String -> Either String String
 partOne input = parsePartOne input & solvePartOne & show & Right

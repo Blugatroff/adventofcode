@@ -3,16 +3,13 @@ module Year2022.Day14 (partOne, partTwo) where
 import MeLude hiding (range)
 import Util (readInt, split, trim, readInt, splitSeq, splitOnce)
 import qualified Data.Map as M
-import Control.Monad.State (State, get, modify, evalState)
+import Control.Monad.State (State, get, gets, modify, evalState)
 
 type Path = [(Int, Int)]
 
 parsePath :: String -> Either String Path
-parsePath line = 
-  splitSeq "->" line
-  <&> trim isSpace
-  <&> splitOnce ','
-  & traverse (\case
+parsePath line = do
+  for (splitSeq "->" line) (trim isSpace >>> splitOnce ',' >>> \case
     Just (x, y) -> do
       x <- readInt x
       y <- readInt y
@@ -46,13 +43,12 @@ insertPaths paths = do
     forM_ paths insertPath
 
 drawCave :: Cave -> String
-drawCave cave = concat $ intersperse "\n" $
-    [minY..maxY] <&> \y ->
+drawCave cave = intercalate "\n" ([minY..maxY] <&> \y ->
         [minX..maxX] <&> (\x ->
             case M.lookup (x, y) cave of
                 Nothing -> '.'
                 Just Stone -> '#'
-                Just Sand -> 'o')
+                Just Sand -> 'o'))
     where
         minX = M.keys cave <&> fst & minimum
         minY = M.keys cave <&> snd & minimum
@@ -62,15 +58,15 @@ drawCave cave = concat $ intersperse "\n" $
 
 simulateSand :: Int -> (Int, Int) -> State Cave Bool
 simulateSand floor pos@(x, y) = do
-    block <- get <&> M.lookup pos
+    block <- gets $ M.lookup pos
     case block of
         Nothing -> do
             let downPos = (x, y + 1)
             let leftPos = (x - 1, y + 1)
             let rightPos = (x + 1, y + 1)
-            down <- get <&> M.lookup downPos
-            left <- get <&> M.lookup leftPos
-            right <- get <&> M.lookup rightPos
+            down <- gets $ M.lookup downPos
+            left <- gets $ M.lookup leftPos
+            right <- gets $ M.lookup rightPos
             let pos = (case (down, left, right) of
                     (Nothing, _, _) -> Just downPos
                     (_, Nothing, _) -> Just leftPos
@@ -94,26 +90,26 @@ findAbyss cave = M.assocs cave & filter ((==Stone) . snd) <&> snd . fst & maximu
 solvePartOne :: [Path] -> String
 solvePartOne paths = flip evalState M.empty $ do
     insertPaths paths
-    abyss <- get <&> findAbyss
+    abyss <- gets findAbyss
     count <- untilAbyss abyss
-    get <&> drawCave <&> (<> "\n" <> show count)
+    gets $ drawCave >>> (<> "\n" <> show count)
     where
         untilAbyss :: Int -> State Cave Int
         untilAbyss abyss = do
             fellIntoAbyss <- simulateSand abyss (500, 0)
-            case fellIntoAbyss of
-                True -> return 0
-                False -> untilAbyss abyss <&> (+1)
+            if fellIntoAbyss
+              then return 0 
+              else untilAbyss abyss <&> (+1)
 
 solvePartTwo :: [Path] -> Int
 solvePartTwo paths = flip evalState M.empty $ do
     insertPaths paths
-    floor <- get <&> (+2) . findAbyss
+    floor <- gets $ (+2) . findAbyss
     untilFull floor
     where
         untilFull :: Int -> State Cave Int
         untilFull floor = do
-            get <&> M.lookup (500, 0) >>= \case
+            gets (M.lookup (500, 0)) >>= \case
                 Just _ -> return 0
                 Nothing -> do
                     _ <- simulateSand floor (500, 0)
@@ -123,5 +119,5 @@ partOne :: String -> Either String String
 partOne input = parse input <&> solvePartOne
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = parse input <&> (solvePartTwo >>> show)
 

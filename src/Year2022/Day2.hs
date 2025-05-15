@@ -38,7 +38,7 @@ parseLine line = case splitOnce ' ' line of
   Nothing -> Left $ "expected game got " <> line
 
 parse :: String -> Either String [(Shape, Shape)]
-parse input = split '\n' input <&> trim isSpace & traverse parseLine
+parse input = split '\n' input & traverse (parseLine . trim isSpace)
 
 logic :: M.Map (Shape, Shape) Outcome
 logic =
@@ -89,7 +89,8 @@ solvePartTwo lines = map gameScore lines & sum
         score = shapeScore chosen + outcomeScore outcome
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input
+

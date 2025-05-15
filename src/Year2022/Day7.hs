@@ -27,11 +27,11 @@ parseLine line = case splitOnce ' ' line of
   Nothing -> Left $ "Failed to parse command " <> line
 
 parse :: String -> Either String [TerminalLine]
-parse input = split '\n' input <&> trim isSpace & traverse parseLine
+parse input = split '\n' input & traverse (parseLine . trim isSpace)
 
 fileSystemSize :: FileSystem -> Int
 fileSystemSize (File _ size) = size
-fileSystemSize (Directory entries) = M.assocs entries <&> snd <&> fileSystemSize & sum
+fileSystemSize (Directory entries) = sum $ fileSystemSize . snd <$> M.assocs entries
 
 insertEntry :: [String] -> (Maybe FileSystem -> FileSystem) -> FileSystem -> FileSystem
 insertEntry [] new sys = new $ Just sys
@@ -89,7 +89,7 @@ solvePartTwo lines =
     needed = updateSize - (diskSize - fileSystemSize system)
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input

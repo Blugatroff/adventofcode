@@ -66,7 +66,7 @@ solvePartTwo cubes = length $ filter (fromMaybe False . flip M.lookup lookup) ne
     lookup = distinctNeighbours <&> (\pos -> (pos, fill pos cubes)) & M.fromList
 
 partOne :: String -> Either String String
-partOne input = parse input <&> S.fromList <&> solvePartOne <&> show
+partOne input = show . solvePartOne . S.fromList <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> S.fromList <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo . S.fromList <$> parse input

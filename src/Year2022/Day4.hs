@@ -53,7 +53,7 @@ solvePartTwo lines =
     & length
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input

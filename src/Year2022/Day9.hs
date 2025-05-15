@@ -26,7 +26,7 @@ parseLine s = do
     Nothing -> Left $ "Failed to parse line: " <> s
 
 parse :: String -> Either String [Instruction]
-parse input = split '\n' input <&> trim isSpace & traverse parseLine <&> concat
+parse input = concat <$> traverse (parseLine . trim isSpace) (split '\n' input)
 
 pull :: (Int, Int) -> (Int, Int) -> (Int, Int)
 pull (headX, headY) (tailX, tailY)
@@ -64,7 +64,8 @@ solve tailLength instructions = foldl' fold ((0, 0) :| replicate tailLength (0, 
         visited = NE.last movedRope
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solve 1 <&> show
+partOne input = show . solve 1 <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solve 9 <&> show
+partTwo input = show . solve 9 <$> parse input
+

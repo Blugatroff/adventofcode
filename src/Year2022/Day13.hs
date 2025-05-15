@@ -16,7 +16,7 @@ parseElement :: String -> Either String (Element, String)
 parseElement [] = Left "expected element got ''"
 parseElement input@(c : rest) | isDigit c = do
   n <- readInt $ takeWhile isDigit input
-  return $ (Number n, dropWhile isDigit input)
+  return (Number n, dropWhile isDigit input)
 parseElement ('[' : ']' : rest) = Right (List [], rest)
 parseElement ('[' : rest) = do
   (elems, rest) <- run [] rest
@@ -56,16 +56,14 @@ dividers = [List [List [Number 2]], List [List [Number 6]]]
 
 solvePartTwo :: [Element] -> Int
 solvePartTwo elements =
-  dividers
-    <&> (`elemIndex` sorted)
-    & catMaybes
+  mapMaybe (`elemIndex` sorted) dividers
     <&> (+ 1)
     & product
   where
     sorted = sort (elements <> dividers)
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = parse input <&> (solvePartOne >>> show)
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = parse input <&> (solvePartTwo >>> show)

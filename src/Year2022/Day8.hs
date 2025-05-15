@@ -7,20 +7,18 @@ import Util (readInt, split, trim)
 type Grid = M.Map (Int, Int) Int
 
 parse :: String -> Either String Grid
-parse input = M.fromList <$> assocs
-  where
-    assocs :: Either String [((Int, Int), Int)]
-    assocs = rows <&> zipWith (\y -> zipWith (\x v -> ((x, y), v)) [0 ..]) [0 ..] <&> concat
+parse input = do
+  let lines = trim isSpace <$> split '\n' input
+  rows :: [[Int]] <- traverse (traverse readDigit) $ filter (not . null) lines
 
+  pure $ fold $ do
+    (y, row) <- zip [0..] rows
+    (x, v) <- zip [0..] row
+    pure $ M.singleton (x, y) v
+  where
     readDigit :: Char -> Either String Int
     readDigit c = readInt [c]
 
-    rows :: Either String [[Int]]
-    rows =
-      split '\n' input
-        <&> trim isSpace
-        & filter (not . null)
-        & traverse (traverse readDigit)
 
 pathsToBorder :: (Int, Int) -> (Int, Int) -> [[(Int, Int)]]
 pathsToBorder (width, height) (x, y) = [top, bottom, left, right]
@@ -71,7 +69,7 @@ solvePartTwo :: Grid -> Int
 solvePartTwo grid = M.keys grid <&> scenicScore (gridWidth grid, gridHeight grid) grid & maximum
 
 partOne :: String -> Either String String
-partOne input = parse input <&> solvePartOne <&> show
+partOne input = show . solvePartOne <$> parse input
 
 partTwo :: String -> Either String String
-partTwo input = parse input <&> solvePartTwo <&> show
+partTwo input = show . solvePartTwo <$> parse input
