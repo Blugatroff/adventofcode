@@ -38,7 +38,7 @@ parse input = do
 
 windows :: Int -> [a] -> [[a]]
 windows size [] = []
-windows size list = take size list : windows size (tail list)
+windows size list@(_:rest) = take size list : windows size rest
 
 findRule :: String -> [Rule] -> Maybe Rule
 findRule [left, right] = find (\(l, r, _) -> l == left && r == right)
@@ -92,7 +92,9 @@ applyRulespartTwo rules = do
     return ()
 
 computeScorePartTwo :: Letters -> Int
-computeScorePartTwo letters = last list - head list
+computeScorePartTwo letters = case unsnoc list of
+    Just (first:_, last) -> last - first
+    _ -> 0
   where
     list = sort $ M.toList letters <&> snd
 

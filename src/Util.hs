@@ -28,10 +28,10 @@ lpad n v l = map (const v) [0 .. (n - length l)] ++ l
 
 replace :: (Eq a) => [a] -> [a] -> [a] -> [a]
 replace pat with [] = []
-replace pat with rest =
-  if pat `isPrefixOf` rest
-    then with ++ drop (length pat) rest
-    else head rest : replace pat with (tail rest)
+replace pat with s@(c:rest) =
+  if pat `isPrefixOf` s
+    then with ++ drop (length pat) s
+    else c : replace pat with rest
 
 trim :: (a -> Bool) -> [a] -> [a]
 trim f = dropWhileEnd f . dropWhile f
@@ -41,10 +41,10 @@ trimSpace = trim isSpace
 
 findSeq :: (Eq a) => [a] -> [a] -> Maybe Int
 findSeq [] list = Just 0
-findSeq pat list = case span (\v -> v /= head pat) list of
+findSeq pat@(c:_) list = case span (/= c) list of
   (before, []) -> Nothing
   (before, match) | pat `isPrefixOf` match -> Just $ length before
-  (before, match) -> (+ 1) . (+) (length before) <$> findSeq pat (tail match)
+  (before, _:match) -> (+ 1) . (+) (length before) <$> findSeq pat match
 
 splitSeq :: (Eq a) => [a] -> [a] -> [[a]]
 splitSeq del list =
@@ -88,7 +88,7 @@ safeHead (a : _) = Just a
 
 safeTail :: [a] -> Maybe [a]
 safeTail [] = Nothing
-safeTail xs = Just $ tail xs
+safeTail (_:xs) = Just xs
 
 safeLast :: [a] -> Maybe a
 safeLast [] = Nothing
@@ -237,7 +237,9 @@ parseGrid :: (IArray a e) => (Char -> Either String e) -> String -> Either Strin
 parseGrid parseCell input = do
   cells <- traverse (traverse parseCell) $ filter (not . null) $ map trimSpace $ lines input
   let height = length cells
-  let width = length (head cells)
+  width <- case cells of
+    [] -> Left "not enough lines"
+    cells -> Right $ length cells
   Right $ array (Pos 0 0, Pos (width - 1) (height - 1)) $ do
     (y, row) <- zip [0 ..] cells
     (x, cell) <- zip [0 ..] row

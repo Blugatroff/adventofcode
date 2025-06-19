@@ -3,7 +3,7 @@ module Year2022.Day14 (partOne, partTwo) where
 import MeLude hiding (range)
 import Util (readInt, split, trim, readInt, splitSeq, splitOnce)
 import qualified Data.Map as M
-import Control.Monad.State (State, get, gets, modify, evalState)
+import Control.Monad.State (State, gets, modify, evalState)
 
 type Path = [(Int, Int)]
 

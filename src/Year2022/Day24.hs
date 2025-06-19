@@ -107,7 +107,9 @@ instance Dijkstra.World ValleyWorld where
 
   adjacentCells (ValleyWorldPos phase pos@(Pos x y) valleys) ValleyWorld = do
     valley <- maybe [] singleton $ safeHead valleys
-    let nextValleys = tail valleys
+    nextValleys <- case valleys of
+      [] -> []
+      (_:nextValleys) -> [nextValleys]
     possibleActions valley pos <&> \case
       Wait -> ValleyWorldPos phase pos nextValleys
       Move direction -> do

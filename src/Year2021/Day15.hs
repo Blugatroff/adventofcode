@@ -45,8 +45,10 @@ parse :: String -> Either String Cave
 parse input = do
   let lines = split '\n' input <&> trim isSpace & filter (not . null)
   rows <- traverse (traverse (readInt . (: []))) lines
+  width <- case rows of
+    [] -> Left "Need at least one row!"
+    (row:_) -> Right $ length row
   let cells = concat rows
-  let width = length $ head rows
   let height = length rows
   let array = A.array (0, length cells - 1) (zip [0 ..] cells)
   Right $ Cave array width height

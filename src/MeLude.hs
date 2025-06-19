@@ -41,6 +41,8 @@ import Data.List as X (
   filter,
   findIndex,
   head,
+  uncons,
+  unsnoc,
   init,
   intercalate,
   intersperse,
